@@ -19,6 +19,9 @@ int jsapi_conncontext_get_protocol_version(ConnContext* ctx);
 int jsapi_conncontext_get_smstate(ConnContext* ctx);
 void jsapi_conncontext_get_active_fingerprint(ConnContext* ctx, char* human);
 char* jsapi_conncontext_get_trust(ConnContext* ctx);
+otrl_instag_t jsapi_conncontext_get_their_instance(ConnContext* ctx);
+otrl_instag_t jsapi_conncontext_get_our_instance(ConnContext* ctx);
+ConnContext* jsapi_conncontext_get_master(ConnContext* ctx);
 
 OtrlPolicy msgops_callback_policy(void *opdata,ConnContext *context);
 
@@ -31,19 +34,7 @@ int msgops_callback_is_logged_in(void *opdata, const char *accountname,
 void msgops_callback_inject_message(void *opdata, const char *accountname,
         const char *protocol, const char *recipient, const char *message);
 
-void msgops_callback_notify(void *opdata, OtrlNotifyLevel level,
-        const char *accountname, const char *protocol,
-        const char *username, const char *title,
-        const char *primary, const char *secondary);
-
-int msgops_callback_display_otr_message(void *opdata, const char *accountname,
-        const char *protocol, const char *username, const char *msg);
-
 void msgops_callback_update_context_list(void *opdata);
-
-const char* msgops_callback_protocol_name(void *opdata, const char *protocol);
-
-void msgops_callback_protocol_name_free(void *opdata, const char *protocol_name);
 
 void msgops_callback_new_fingerprint(void *opdata, OtrlUserState us,
         const char *accountname, const char *protocol,
@@ -53,13 +44,32 @@ void msgops_callback_write_fingerprints(void *opdata);
 void msgops_callback_gone_secure(void *opdata, ConnContext *context);
 void msgops_callback_gone_insecure(void *opdata, ConnContext *context);
 void msgops_callback_still_secure(void *opdata, ConnContext *context, int is_reply);
-void msgops_callback_log_message(void *opdata, const char *message);
 int msgops_callback_max_message_size(void *opdata, ConnContext *context);
 const char * msgops_callback_account_name(void *opdata, const char *account, const char *protocol);
 void msgops_callback_account_name_free(void *opdata, const char *account_name);
+void msgops_callback_received_symkey(void *opdata, ConnContext *context,
+        unsigned int use, const unsigned char *usedata,
+        size_t usedatalen, const unsigned char *symkey);
+const char * msgops_callback_otr_error_message(void *opdata, ConnContext *context, OtrlErrorCode err_code);
+void msgops_callback_otr_error_message_free(void *opdata, const char *err_msg);
+const char * msgops_callback_resent_msg_prefix(void *opdata, ConnContext *context);
+void msgops_callback_resent_msg_prefix_free(void *opdata, const char *prefix);
+void msgops_callback_handle_smp_event(void *opdata, OtrlSMPEvent smp_event,
+        ConnContext *context, unsigned short progress_percent,
+        char *question);
+void msgops_callback_handle_msg_event(void *opdata, OtrlMessageEvent msg_event,
+        ConnContext *context, const char *message,
+        gcry_error_t err);
+void msgops_callback_create_instag(void *opdata, const char *accountname,
+        const char *protocol);
+void msgops_callback_convert_msg(void *opdata, ConnContext *context,
+        OtrlConvertType convert_type, char ** dest, const char *src);
+void msgops_callback_convert_free(void *opdata, ConnContext *context, char *dest);
+void msgops_callback_timer_control(void *opdata, unsigned int interval);
+
 OtrlMessageAppOps* jsapi_messageappops_new();
 
 int jsapi_message_receiving (OtrlUserState userstate,OtrlMessageAppOps *messageops, void *opsdata, 
-        char *accountname, char *protocol, char *sender, char *message, char** newmessage) EMSCRIPTEN_KEEPALIVE;
+        char *accountname, char *protocol, char *sender, char *message, char** newmessage);
 
 int jsapi_can_start_smp(ConnContext* ctx);

@@ -1,5 +1,5 @@
 EMCC = $(HOME)/Dev/emscripten/emcc
-CRYPTO_BUILD = $(HOME)/projects/crypto-emscripten/build-otr3
+CRYPTO_BUILD = $(HOME)/projects/crypto-emscripten/build-otr4
 
 BUILD_DIR = lib
 
@@ -12,7 +12,9 @@ EXPORTED_FUNCS= -s EXPORTED_FUNCTIONS="['_gcry_strerror','_malloc','_free','__gc
             '_jsapi_privkey_get_protocol', '_jsapi_userstate_get_privkey_root', '_jsapi_conncontext_get_protocol', \
             '_jsapi_conncontext_get_username', '_jsapi_conncontext_get_accountname','_jsapi_conncontext_get_msgstate', \
             '_jsapi_conncontext_get_protocol_version', '_jsapi_conncontext_get_smstate', '_jsapi_conncontext_get_active_fingerprint', \
-            '_jsapi_conncontext_get_trust', '_jsapi_initialise','_jsapi_messageappops_new']"
+            '_jsapi_conncontext_get_trust', '_jsapi_initialise','_jsapi_messageappops_new','_otrl_message_abort_smp', \
+            '_otrl_message_receiving', '_otrl_instag_generate', '_jsapi_conncontext_get_their_instance', '_jsapi_conncontext_get_our_instance', \
+            '_jsapi_conncontext_get_master' ]"
 
 OPTIMISATION_OFF= -O0 --closure 0 --llvm-opts 0 --minify 0 -s LINKABLE=1
 OPTIMISATION_ON= -O2 --closure 1 --llvm-opts 0 --minify 0 -s LINKABLE=1 $(EXPORTED_FUNCS)
@@ -22,7 +24,7 @@ OPTIMISATION= $(OPTIMISATION_OFF)
 module:
 	mkdir -p $(BUILD_DIR)/
 	$(EMCC) src/jsapi.c -I$(CRYPTO_BUILD)/include -lgcrypt -lotr -lgpg-error -L$(CRYPTO_BUILD)/lib \
-        -o $(BUILD_DIR)/libotr3.js \
+        -o $(BUILD_DIR)/libotr4.js \
 		--pre-js src/otr_pre.js \
         --post-js src/otr_post.js \
 		-s TOTAL_MEMORY=1048576  -s TOTAL_STACK=409600 \
@@ -30,11 +32,11 @@ module:
 
 module-optimised:
 	mkdir -p $(BUILD_DIR)/
-	cp src/otr_post.js $(BUILD_DIR)/libotr3.js
+	cp src/otr_post.js $(BUILD_DIR)/libotr4.js
 	$(EMCC) src/jsapi.c -I$(CRYPTO_BUILD)/include -lgcrypt -lotr -lgpg-error -L$(CRYPTO_BUILD)/lib \
-        -o $(BUILD_DIR)/_libotr3.js \
+        -o $(BUILD_DIR)/_libotr4.js \
 		--pre-js src/otr_pre.js \
 		-s TOTAL_MEMORY=1048576  -s TOTAL_STACK=409600 \
         $(OPTIMISATION_ON)
-	cat $(BUILD_DIR)/_libotr3.js >> $(BUILD_DIR)/libotr3.js
-	rm $(BUILD_DIR)/_libotr3.js
+	cat $(BUILD_DIR)/_libotr4.js >> $(BUILD_DIR)/libotr4.js
+	rm $(BUILD_DIR)/_libotr4.js

@@ -156,6 +156,7 @@ Module['preRun'].push(function(){
 //    _static_new_mpi_ptr_ptr = _malloc(4);
     _static_buffer_ptr = allocate(4096,"i8",ALLOC_STATIC); 
     _static_new_mpi_ptr_ptr = allocate(4,"i8",ALLOC_STATIC);
+    _static_otr_error_message_str = allocate(512,"i8",ALLOC_STATIC);
 
     Module["libgcrypt"] = {};
     Module["libgcrypt"]["mpi_new"] = gcry_.mpi_new = cwrap('_gcry_mpi_new','number',['number']);
@@ -171,17 +172,21 @@ Module['preRun'].push(function(){
     Module["libotrl"]["userstate_destroy"]=otrl_.userstate_destroy=cwrap('otrl_userstate_destroy','',['number']);
     Module["libotrl"]["privkey_read"]=otrl_.privkey_read=cwrap('otrl_privkey_read','number',['number','string']);
     Module["libotrl"]["privkey_fingerprint"]=otrl_.privkey_fingerprint=cwrap('otrl_privkey_fingerprint','number',['number','number','string','string']);
-    Module["libotrl"]["privkey_read_fingerprints"]=otrl_.privkey_read_fingerprints=cwrap('otrl_privkey_read_fingerprints','number',['number','string','number','number']); 
+    Module["libotrl"]["privkey_read_fingerprints"]=otrl_.privkey_read_fingerprints=cwrap('otrl_privkey_read_fingerprints','number',['number','string','number','number']);
     Module["libotrl"]["privkey_write_fingerprints"]=otrl_.privkey_write_fingerprints=cwrap('otrl_privkey_write_fingerprints','number',['number','string']);
-    Module["libotrl"]["privkey_generate"]=otrl_.privkey_generate=cwrap('otrl_privkey_generate','number',['number','string','string','string']);    
-    Module["libotrl"]["context_find"]=otrl_.context_find=cwrap('otrl_context_find','number',['number','string','string','string','number','number','number','number']);
-    Module["libotrl"]["message_sending"]=otrl_.message_sending=cwrap('otrl_message_sending','number',['number','number','number','string','string','string','string','number','number','number','number']);
+    Module["libotrl"]["privkey_generate"]=otrl_.privkey_generate=cwrap('otrl_privkey_generate','number',['number','string','string','string']);
+    Module["libotrl"]["context_find"]=otrl_.context_find=cwrap('otrl_context_find','number',['number','string','string','string','number','number','number','number','number']);
+    Module["libotrl"]["message_sending"]=otrl_.message_sending=cwrap('otrl_message_sending','number',['number','number','number','string','string','string',
+                                                                                                    'number','string','number','number','number','number','number','number']);
     Module["libotrl"]["message_free"]=otrl_.message_free=cwrap('otrl_message_free','',['number']);
-    Module["libotrl"]["message_fragment_and_send"]=otrl_.message_fragment_and_send=cwrap('otrl_message_fragment_and_send','number',['number','number','number','string','number','number']);
     Module["libotrl"]["message_disconnect"]=otrl_.message_disconnect = cwrap('otrl_message_disconnect','',['number','number','number','string','string','string']);
     Module["libotrl"]["message_initiate_smp_q"]=otrl_.message_initiate_smp_q=cwrap('otrl_message_initiate_smp_q','',['number','number','number','number','string','string','number']);
     Module["libotrl"]["message_initiate_smp"]=otrl_.message_initiate_smp=cwrap('otrl_message_initiate_smp','',['number','number','number','number','string','number']);
     Module["libotrl"]["message_respond_smp"]=otrl_.message_respond_smp=cwrap('otrl_message_respond_smp','',['number','number','number','number','string','number']);
+    //newly used add to exported functions!
+    Module["libotrl"]["message_abort_smp"]=otrl_.message_abort_smp=cwrap('otrl_message_abort_smp','',['number','number','number','number']);
+    Module["libotrl"]["message_receiving"]=otrl_.message_receiving=cwrap('otrl_message_receiving','number',['number','number','number','string','string','string','string','number','number','number','number','number']);
+    Module["libotrl"]["instag_generate"]=otrl_.instag_generate=cwrap('otrl_instag_generate','number',['number','string','string','string']);
 
     Module["jsapi"]={};    
     Module["jsapi"]["message_receiving"]=jsapi_.message_receiving = cwrap('jsapi_message_receiving','number',['number','number','number','string','string','string','string','number']);
@@ -200,6 +205,11 @@ Module['preRun'].push(function(){
     Module["jsapi"]["conncontext_get_trust"]=jsapi_.conncontext_get_trust = cwrap('jsapi_conncontext_get_trust','string',['number']);
     Module["jsapi"]["initialise"]=jsapi_.initialise = cwrap('jsapi_initialise');
     Module["jsapi"]["messageappops_new"]=jsapi_.messageappops_new = cwrap('jsapi_messageappops_new','number');
+    //new jsapi functions to add to exported_funcs
+    Module["jsapi"]["conncontext_get_their_instance"]=jsapi_.conncontext_get_their_instance = cwrap('jsapi_conncontext_get_their_instance','number',['number']);
+    Module["jsapi"]["conncontext_get_our_instance"]=jsapi_.conncontext_get_our_instance = cwrap('jsapi_conncontext_get_our_instance','number',['number']);
+    Module["jsapi"]["conncontext_get_master"]=jsapi_.conncontext_get_master = cwrap('jsapi_conncontext_get_master','number',['number']);
+
 
 if(true){
 // some of the MPI calculations are slow
@@ -364,10 +374,11 @@ if(true){
 }
 });
 
-
+/*
 function __msgops_callback_remote_disconnected($opdata,$context){
     Module["ops_event"]($opdata, (new Module["ConnContext"]($context))["obj"](),"remote_disconnected");
 }
+*/
 function __msgops_callback_smp_request($opdata,$context,$question){
     var obj = (new Module["ConnContext"]($context))["obj"]();
     if($question!=0) obj["question"] = Module["Pointer_stringify"]($question);
@@ -385,6 +396,11 @@ function __msgops_callback_smp_complete($opdata,$context){
     //console.log("__msgops_callback_smp_compelte");
     Module["ops_event"]($opdata, (new Module["ConnContext"]($context))["obj"](),"smp_complete");
 }
+function __msgops_callback_smp_error($opdata,$context){
+    //console.log("__msgops_callback_smp_error");
+    Module["ops_event"]($opdata, (new Module["ConnContext"]($context))["obj"](),"smp_error");    
+}
+
 function __msgops_callback_policy($opdata, $context) {
   return Module["ops_event"]($opdata,{},"policy");
 }
@@ -397,29 +413,10 @@ function __msgops_callback_is_logged_in($opdata,$accountname,$protocol,$recipien
   return Module["ops_event"]($opdata,{},"is_logged_in");
 }
 
-function __msgops_callback_inject_message($opdata,$accountname,$protocol,
-            $recipient,$message){
-
+function __msgops_callback_inject_message($opdata,$accountname,$protocol,$recipient,$message){
     Module["ops_event"]($opdata,{
         "message":Module["Pointer_stringify"]($message)
     },"inject_message");
-}
-
-function __msgops_callback_notify($opdata,$level,$accountname,$protocol,
-        $username,$title,$primary,$secondary){
-    Module["ops_event"]($opdata,{
-        "title":Module["Pointer_stringify"]($title),
-        "primary":Module["Pointer_stringify"]($primary),
-        "secondary":Module["Pointer_stringify"]($secondary),
-        "level":$level
-    },"notify");
-}
-
-function __msgops_callback_display_otr_message($opdata,$accountname,$protocol,$username,$msg){
-    Module["ops_event"]($opdata,{
-        "message":Module["Pointer_stringify"]($msg)
-    },"display_otr_message");
-    return 1;//fire notify as well
 }
 
 function __msgops_callback_update_context_list($opdata){
@@ -443,11 +440,77 @@ function __msgops_callback_gone_insecure($opdata,$context){
 function __msgops_callback_still_secure($opdata,$context,$is_reply){
     Module["ops_event"]($opdata,{},"still_secure");
 }
-function __msgops_callback_log_message($opdata,$message){
-    Module["ops_event"]($opdata,{
-        "message":Module["Pointer_stringify"]($message)
-    },"log_message");
-}
 function __msgops_callback_max_message_size($opdata,$context){
     return Module["ops_event"]($opdata,{},"max_message_size");
 }
+
+//new ops in libotr4
+/*
+void msgops_callback_received_symkey(void *opdata, ConnContext *context,
+        unsigned int use, const unsigned char *usedata,
+        size_t usedatalen, const unsigned char *symkey){
+}
+*/
+function __msgops_callback_received_symkey($opdata,$context,$use,$usedata,$usedatalen,$symkey){
+}
+
+/*
+const char * msgops_callback_otr_error_message(void *opdata, ConnContext *context, OtrlErrorCode err_code){
+}
+*/
+function __msgops_callback_otr_error_message($opdata, $context, $err_code){
+    //TODO:write error string into _static_otr_error_message_str
+    //for now this is implemented in jsapi.c
+    return _static_otr_error_message_str;
+}
+/*
+void msgops_callback_otr_error_message_free(void *opdata, const char *err_msg){
+}
+*/
+function __msgops_callback_otr_error_message_free($opdata, $err_msg){
+    //no need to free anything.. we are using a statically allocated shared memory location.
+}
+/*
+void msgops_callback_handle_smp_event(void *opdata, OtrlSMPEvent smp_event,
+        ConnContext *context, unsigned short progress_percent,
+        char *question){
+}
+*/
+/** handle this in jsapi.c instead..
+function __msgops_callback_handle_smp_event($opdata,$smp_event,$context,$progress_percent,$question){
+}
+*/
+/*
+void msgops_callback_handle_msg_event(void *opdata, OtrlMessageEvent msg_event,
+        ConnContext *context, const char *message,
+        gcry_error_t err){
+}
+*/
+function __msgops_callback_handle_msg_event($opdata, $msg_event,$context, $message, $err){
+    Module["ops_event"]($opdata,{
+        "event":$msg_event,
+        "message":Module["Pointer_stringify"]($message)
+    },"msg_event");
+}
+/*
+void msgops_callback_create_instag(void *opdata, const char *accountname,
+        const char *protocol){
+}*/
+function __msgops_callback_create_instag($opdata, $accountname, $protocol){
+    Module["ops_event"]($opdata,{
+        "accountname":Module["Pointer_stringify"]($accountname),
+        "protocol":Module["Pointer_stringify"]($protocol)
+    },"create_instag");
+}
+/*
+void msgops_callback_convert_msg(void *opdata, ConnContext *context,
+        OtrlConvertType convert_type, char ** dest, const char *src){
+    _msgops_callback_convert_msg(opdata, context, convert_type, dest, src);
+}
+void msgops_callback_convert_free(void *opdata, ConnContext *context, char *dest){
+    _msgops_callback_convert_free(opdata, context, dest);
+}
+void msgops_callback_timer_control(void *opdata, unsigned int interval){
+    _msgops_callback_timer_control(opdata,interval);
+}
+*/

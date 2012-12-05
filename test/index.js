@@ -1,4 +1,4 @@
-var async = require("../lib/async");
+var async = require("async");
 var libotr = require('../lib/otr-module');
 
 console.log("== loaded libotr version:",libotr.version());
@@ -49,15 +49,22 @@ var NET_QUEUE_B = async.queue(handle_messages,1);
 function handle_messages(O,callback){
     O.channel.recv(O.msg);
     callback();
-    if(verbose)dumpConnContext(O.channel,O.channel.user.name);
+    if(verbose) dumpConnContext(O.channel,O.channel.user.name);
 }
-    
+
+//console.log(otrchan_a);
+//console.log(otrchan_b);
+
 //simulate a network connection between two parties
 otrchan_a.on("inject_message",function(msg){
-        NET_QUEUE_A.push({channel:otrchan_b,msg:msg});
+    if(verbose) console.log("ALICE:",msg);
+    NET_QUEUE_A.push({channel:otrchan_b,msg:msg});
+//    otrchan_b.recv(msg);
 });
 otrchan_b.on("inject_message",function(msg){
-        NET_QUEUE_B.push({channel:otrchan_a,msg:msg});
+    if(verbose)console.log("BOB:",msg);
+    NET_QUEUE_B.push({channel:otrchan_a,msg:msg});
+//    otrchan_a.recv(msg);
 });
 
 //output incoming messages to console
@@ -94,7 +101,6 @@ otrchan_a.on("remote_disconnected",function(){
     exit_test("");
 });
 
-
 otrchan_a.on("gone_secure",function(){
     if(!this.isAuthenticated()){
             console.log("Alice initiating SMP authentication to verify keys...");
@@ -109,8 +115,7 @@ otrchan_b.on("smp_request",function(){
 
 
 otrchan_a.send("Hello Bob!");
-
-otrchan_a.connect();
+//otrchan_a.connect();
 
 var loop = setInterval(function(){
     console.log("_");
@@ -122,8 +127,8 @@ var loop = setInterval(function(){
     }
     if(otrchan_a.isEncrypted() && otrchan_a.isAuthenticated()){
         console.log("Finger print verification successful");
-        dumpConnContext(otrchan_a,"Alice's ConnContext:");
-        dumpConnContext(otrchan_b,"Bob's ConnContext:");   
+//        dumpConnContext(otrchan_a,"Alice's ConnContext:");
+//        dumpConnContext(otrchan_b,"Bob's ConnContext:");   
         TEST_PASSED=true;        
         if(loop) clearInterval(loop);        
         otrchan_b.close();
@@ -131,6 +136,8 @@ var loop = setInterval(function(){
 },500);
 
 function exit_test(msg){
+//    dumpConnContext(otrchan_a,"Alice's ConnContext:");
+//    dumpConnContext(otrchan_b,"Bob's ConnContext:");
     console.log(msg);
     if(TEST_PASSED){ console.log("== TEST PASSED ==\n"); } else { console.log("== TEST FAILED ==\n"); }
     process.exit();
@@ -139,4 +146,3 @@ function exit_test(msg){
 function dumpConnContext(chan,msg){
     console.log(msg,"\n",chan.context.obj());
 }
-
