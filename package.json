@@ -1,0 +1,21 @@
+{
+    "name":     "otr3-em",
+    "version":  "v0.0.1",
+    "main": "index.js",
+    "description": "Off-the-Record Messaging Protocol [emscripten libotr3.2.1]",
+    "homepage": "https://github.com/mnaamani/otr3-em",
+    "author":{
+        "name":"Mokhtar Naamani",
+        "email":"mokhtar.naamani@gmail.com",
+        "url":"https://github.com/mnaamani"
+    },
+    "repository":{
+        "type":"git",
+        "url":"git@github.com:mnaamani/otr3-em.git"
+    },
+    "dependencies":
+    {
+        "async":"*"
+    },
+    "license": "GPLv2"
+}
