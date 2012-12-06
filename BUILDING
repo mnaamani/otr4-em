@@ -1,0 +1,26 @@
+Building the libotr4.js 
+
+Setup Emscripten, LLVM+clang
+
+    https://github.com/kripken/emscripten/wiki/Tutorial
+
+Build libgpg-error,libgcrypt and libotr using crypto-emscripten tool:
+edit the ./build-libs script to specify version 4.0.0 of libotr
+
+    cd $HOME
+    git clone https://github.com/mnaamani/crypto-emscripten/
+    cd crypto-emscripten/
+    ./build-libs
+
+Edit Makefile with location of where you installed emscripten, and crypto-emscripten, eg.
+
+    EMCC = PATH_TO_EMSCRIPTEN/emcc
+    CRYPTO_BUILD = $(HOME)/crypto-emscripten/build
+
+build libotr4.js:
+    
+    make module
+
+test it:
+
+    node test
