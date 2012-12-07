@@ -14,7 +14,7 @@ EXPORTED_FUNCS= -s EXPORTED_FUNCTIONS="['_gcry_strerror','_malloc','_free','__gc
             '_jsapi_conncontext_get_protocol_version', '_jsapi_conncontext_get_smstate', '_jsapi_conncontext_get_active_fingerprint', \
             '_jsapi_conncontext_get_trust', '_jsapi_initialise','_jsapi_messageappops_new','_otrl_message_abort_smp', \
             '_otrl_message_receiving', '_otrl_instag_generate', '_jsapi_conncontext_get_their_instance', '_jsapi_conncontext_get_our_instance', \
-            '_jsapi_conncontext_get_master' ]"
+            '_jsapi_conncontext_get_master', '_otrl_instag_read' ]"
 
 OPTIMISATION_OFF= -O0 --closure 0 --llvm-opts 0 --minify 0 -s LINKABLE=1
 OPTIMISATION_ON= -O2 --closure 1 --llvm-opts 0 --minify 0 -s LINKABLE=1 $(EXPORTED_FUNCS)

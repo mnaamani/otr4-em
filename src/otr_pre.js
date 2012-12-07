@@ -187,6 +187,7 @@ Module['preRun'].push(function(){
     Module["libotrl"]["message_abort_smp"]=otrl_.message_abort_smp=cwrap('otrl_message_abort_smp','',['number','number','number','number']);
     Module["libotrl"]["message_receiving"]=otrl_.message_receiving=cwrap('otrl_message_receiving','number',['number','number','number','string','string','string','string','number','number','number','number','number']);
     Module["libotrl"]["instag_generate"]=otrl_.instag_generate=cwrap('otrl_instag_generate','number',['number','string','string','string']);
+    Module["libotrl"]["instag_read"]=otrl_.instag_read=cwrap('otrl_instag_read','number',['number','string']);
 
     Module["jsapi"]={};    
     Module["jsapi"]["message_receiving"]=jsapi_.message_receiving = cwrap('jsapi_message_receiving','number',['number','number','number','string','string','string','string','number']);
