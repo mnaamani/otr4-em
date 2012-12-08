@@ -169,7 +169,7 @@ Module['preRun'].push(function(){
     Module["libotrl"] = {};
     Module["libotrl"]["version"] = otrl_.version = cwrap('otrl_version','string');    
     Module["libotrl"]["userstate_create"]=otrl_.userstate_create=cwrap('otrl_userstate_create','',['number']);
-    Module["libotrl"]["userstate_destroy"]=otrl_.userstate_destroy=cwrap('otrl_userstate_destroy','',['number']);
+    Module["libotrl"]["userstate_free"]=otrl_.userstate_free=cwrap('otrl_userstate_free','',['number']);
     Module["libotrl"]["privkey_read"]=otrl_.privkey_read=cwrap('otrl_privkey_read','number',['number','string']);
     Module["libotrl"]["privkey_fingerprint"]=otrl_.privkey_fingerprint=cwrap('otrl_privkey_fingerprint','number',['number','number','string','string']);
     Module["libotrl"]["privkey_read_fingerprints"]=otrl_.privkey_read_fingerprints=cwrap('otrl_privkey_read_fingerprints','number',['number','string','number','number']);
@@ -188,9 +188,10 @@ Module['preRun'].push(function(){
     Module["libotrl"]["message_receiving"]=otrl_.message_receiving=cwrap('otrl_message_receiving','number',['number','number','number','string','string','string','string','number','number','number','number','number']);
     Module["libotrl"]["instag_generate"]=otrl_.instag_generate=cwrap('otrl_instag_generate','number',['number','string','string','string']);
     Module["libotrl"]["instag_read"]=otrl_.instag_read=cwrap('otrl_instag_read','number',['number','string']);
+    Module["libotrl"]["instag_write"]=otrl_.instag_write=cwrap('otrl_instag_write','number',['number','string']);
+    Module["libotrl"]["instag_find"]=otrl_.instag_find=cwrap('otrl_instag_find','number',['number','string','string']);
 
     Module["jsapi"]={};    
-    Module["jsapi"]["message_receiving"]=jsapi_.message_receiving = cwrap('jsapi_message_receiving','number',['number','number','number','string','string','string','string','number']);
     Module["jsapi"]["can_start_smp"]=jsapi_.can_start_smp = cwrap('jsapi_can_start_smp','number',['number']);
     Module["jsapi"]["privkey_get_next"]=jsapi_.privkey_get_next = cwrap("jsapi_privkey_get_next",'number',['number']);
     Module["jsapi"]["privkey_get_accountname"]=jsapi_.privkey_get_accountname = cwrap("jsapi_privkey_get_accountname",'string',['number']);
@@ -490,7 +491,8 @@ void msgops_callback_handle_msg_event(void *opdata, OtrlMessageEvent msg_event,
 function __msgops_callback_handle_msg_event($opdata, $msg_event,$context, $message, $err){
     Module["ops_event"]($opdata,{
         "event":$msg_event,
-        "message":Module["Pointer_stringify"]($message)
+        "message":Module["Pointer_stringify"]($message),
+        "err": ($err? gcry_.strerror($err): "")
     },"msg_event");
 }
 /*

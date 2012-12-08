@@ -43,13 +43,14 @@ The policy is used as a parameter in OTRChannel.
 	'DEFAULT'
     
 ## User()
-The User object is a wrapper for UserState (see below). It holds a user's configuration [name, keys, fingerprints] 
+The User object is a wrapper for UserState (see below). It holds a user's configuration [name, keys, fingerprints, instance tags] 
 
     var libotr = require("otr4-em");
     var alice = new libotr.User({
         name:'Alice',			      //an identifier for the User object
         keys:'../home/alice/alice.keys',      //path to OTR keys file (required)
-        fingerprints:'../home/alice/alice.fp' //path to fingerprints file (required)
+        fingerprints:'../home/alice/alice.fp', //path to fingerprints file (required)
+        instags:'/home/alice/alice.instags' //path to instance tags file (required if using protocol v3)
     });
 
 If files exists the keys and fingerprints will be loaded into the userstate automatically.
@@ -70,9 +71,20 @@ To directly access the wrapped UserState object:
         console.log(account.fingerprint);
     });
 
+Creating an instance tag for account/protocol:
+
+   alice.generateInstag("alice@jabber.org","xmpp",function(err,instag){
+        if(err){
+            //something went wrong
+            console.log("failed to generate instance tag.",err);
+        }else{
+            console.log("new instance tag:",instag);
+        }
+   });
+
 ## UserState()
-The UserState holds keys and fingerprints in memory. It exposes methods to read/write these keys
-and fingerprints to the file system, as well as methods to generate them.
+The UserState holds keys, fingerprints and instance tags in memory. It exposes methods to read/write 
+them to the file system, as well as methods to generate them.
 	
 	var libotr = require("otr4-em");
 	var userstate = new libotr.UserState();
@@ -103,11 +115,17 @@ Returns an array of account objects:
 	    protocol: 'xmpp',
 	    fingerprint: '65D366AF CF9B065F 41708CB0 1DC26F61 D3DF5935' } ]
 
+### userstate.generateInstag(path_to_instancetags_file,accountname,protocol);
+Generates a new instance tag for specified accountname/protocol
+
 ### userstate.readKeysSync(path_to_keys_file)
 Synchronously reads the stored keys into the userstate.
 
 ### userstate.readFingerprintsSync(path_to_fingerprints_file)
 Synchronously reads the stored fingerprints into the userstate.
+
+### userstate.readInstagsSync(path_to_instance_tags_file)
+Synchronously reads the stored instance tags into the userstate
 
 ### userstate.writeFingerprintsSync(path_to_fingerprints_file)
 Synchronously writes out the fingerprints in userstate to file.
@@ -135,7 +153,7 @@ The following methods of the ConnContext object give access to its properties:
 * smstate: number: current state of the SMP (Socialist Millionaire's Protocol)
 * trust(): string: 'smp' if recipient's fingerprint has been verified by SMP.
 * their_instance(): instance tag of buddy
-* our_instance(): our instance tag  
+* our_instance(): our instance tag
 
 ## OTRChannel
 OTRChannel creates a simple interface for exchanging messages with buddy. As arguments
@@ -155,8 +173,8 @@ it takes a User,ConnContext,and a dictionary of parameters for the channel:
 connect() will initiate the otr protocol with remote side.
 This can be used if we wish to initiate the protocol without sending an actual message.
 
-### otrchan.send(message)
-send() will fragment and send message.toString() to remote side.
+### otrchan.send(message,instag)
+send() will fragment and send message.toString(). Optional instance tag instag can be specified.
 
 ### otrchan.recv(message)
 call recv() when receiving message from remote side.
@@ -199,7 +217,6 @@ return 'true' only if fingerprint of remote side has been authenticated/verified
 * smp_complete() - SMP authentication completed successfully.
 * smp_failed() - SMP failed (usually buddy doesn't know the secret)
 * smp_aborted() - SMP (something went wrong at the protocol level)
-* smp_error() - same as smp_failed
 
 * remote_disconnected() - channel closed() remotely.
 * update_context_list() - fired when underlying ConnContext changes (inteded mostly for UI updates)
