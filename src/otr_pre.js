@@ -211,6 +211,7 @@ Module['preRun'].push(function(){
     Module["jsapi"]["conncontext_get_their_instance"]=jsapi_.conncontext_get_their_instance = cwrap('jsapi_conncontext_get_their_instance','number',['number']);
     Module["jsapi"]["conncontext_get_our_instance"]=jsapi_.conncontext_get_our_instance = cwrap('jsapi_conncontext_get_our_instance','number',['number']);
     Module["jsapi"]["conncontext_get_master"]=jsapi_.conncontext_get_master = cwrap('jsapi_conncontext_get_master','number',['number']);
+    Module["jsapi"]["instag_get_tag"]=jsapi_.instag_get_tag = cwrap('jsapi_instag_get_tag','number',['number']);
 
 
 if(true){

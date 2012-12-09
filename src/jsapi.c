@@ -46,12 +46,9 @@ int jsapi_conncontext_get_smstate(ConnContext* ctx){
     return ctx->smstate->sm_prog_state;
 }
 void jsapi_conncontext_get_active_fingerprint(ConnContext* ctx, char* human){
-    //active fingerprint is only stored in the master context
     human[0]='\0';
     if(ctx->active_fingerprint==NULL) return;
     otrl_privkey_hash_to_human(human, ctx->active_fingerprint->fingerprint);
-//    if(ctx->m_context->active_fingerprint==NULL) return;
-//    otrl_privkey_hash_to_human(human, ctx->m_context->active_fingerprint->fingerprint);
 }
 char* jsapi_conncontext_get_trust(ConnContext* ctx){
     if(ctx->active_fingerprint == NULL) return NULL;
@@ -65,6 +62,10 @@ otrl_instag_t jsapi_conncontext_get_our_instance(ConnContext* ctx){
 }
 ConnContext* jsapi_conncontext_get_master(ConnContext* ctx){
     return ctx->m_context;
+}
+
+otrl_instag_t jsapi_instag_get_tag(OtrlInsTag *instag){
+    return instag->instag;
 }
 
 //MessageAppOps

@@ -1,4 +1,4 @@
-var async = require("async");
+var async = require("../lib/async");
 var libotr = require('../lib/otr-module');
 
 console.log("== loaded libotr version:",libotr.version());
@@ -28,7 +28,7 @@ alice.generateInstag("alice@telechat.org","telechat",function(err,instag){
 });
 
 var BOB = alice.ConnContext("alice@telechat.org","telechat","BOB");
-var otrchan_a = new libotr.OTRChannel(alice, BOB,{policy:libotr.POLICY("ALWAYS"),secret:'s3cr37'});
+var otrchan_a = new libotr.OTRChannel(alice, BOB,{policy:libotr.POLICY("DEFAULT"),secret:'s3cr37'});
 
 var bob = new libotr.User({name:'bob',keys:keys_dir+'/bob.keys',fingerprints:keys_dir+'/bob.fp',instags:keys_dir+'/bob.instags'});
 bob.generateKey("bob@telechat.org","telechat",function(err){
@@ -42,7 +42,7 @@ bob.generateInstag("bob@telechat.org","telechat",function(err,instag){
     console.log("generating instance tag: error=",err," tag=",instag);
 });
 var ALICE = bob.ConnContext("bob@telechat.org","telechat","ALICE");
-var otrchan_b = new libotr.OTRChannel(bob, ALICE,{policy:libotr.POLICY("ALWAYS"),secret:'s3cr37'});
+var otrchan_b = new libotr.OTRChannel(bob, ALICE,{policy:libotr.POLICY("DEFAULT"),secret:'s3cr37'});
 
 var NET_QUEUE_A = async.queue(handle_messages,1);
 var NET_QUEUE_B = async.queue(handle_messages,1);
@@ -105,9 +105,6 @@ otrchan_a.on("gone_secure",function(){
             otrchan_a.start_smp();
     }
 
-    setTimeout(function(){
-        otrchan_a.send("Hello Bob!");
-    },50);
 });
 
 otrchan_b.on("smp_request",function(){
@@ -115,9 +112,11 @@ otrchan_b.on("smp_request",function(){
         otrchan_b.respond_smp('s3cr37');
 });
 
-
+otrchan_a.on("smp_complete",function(){
+        otrchan_a.send("Hello Bob! - 2");
+});
 //otrchan_a.connect();
-otrchan_a.send("Initial Message");
+otrchan_a.send("Hello Bob! - 1");
 //in libotr4 if policy is ALWAYS - initiall message doesn't seem to get resent or is the test
 //failing because of timing/race condition due to handling alice and bob in same thread..?
 
@@ -125,6 +124,8 @@ var loop = setInterval(function(){
     console.log("_");
     if(otrchan_a.isEncrypted() && otrchan_a.isAuthenticated()){
         console.log("Finger print verification successful");
+        dumpConnContext(otrchan_a,"Alice's ConnContext:");
+        dumpConnContext(otrchan_b,"Bob's ConnContext:"); 
         TEST_PASSED=true;        
         if(loop) clearInterval(loop);        
         otrchan_b.close();

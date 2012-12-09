@@ -22,6 +22,7 @@ char* jsapi_conncontext_get_trust(ConnContext* ctx);
 otrl_instag_t jsapi_conncontext_get_their_instance(ConnContext* ctx);
 otrl_instag_t jsapi_conncontext_get_our_instance(ConnContext* ctx);
 ConnContext* jsapi_conncontext_get_master(ConnContext* ctx);
+otrl_instag_t jsapi_instag_get_tag(OtrlInsTag *instag);
 
 OtrlPolicy msgops_callback_policy(void *opdata,ConnContext *context);
 

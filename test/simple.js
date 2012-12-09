@@ -11,15 +11,23 @@ alice.generateKey("alice.keys","alice@telechat.org","telechat",function(err){
         console.error("error generating key:",err);
     }else{
         console.log("Key Generation Complete.");
-        console.log(alice.accounts());
     }
 });
 
 alice.readKeysSync("alice.keys");
+
 console.log( alice.fingerprint("alice@telechat.org","telechat"));
+
 console.log(alice.accounts());
 
+console.log("generating instance tag...");
+alice.generateInstag("alice.instags","alice@telechat.org","telechat");
+console.log("new tag=", alice.findInstag("alice@telechat.org","telechat"));
+
+console.log("creating a context");
 var ctx = new otr.ConnContext(alice,"alice@telechat.org","telechat","bob");
+console.log( ctx.obj() );
 
-console.log(ctx.obj());
-
+console.log("freeing userstate");
+alice.free();
+console.log("done!");
