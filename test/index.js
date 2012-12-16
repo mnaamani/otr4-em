@@ -1,21 +1,41 @@
-var async = require("../lib/async");
-var libotr = require('../lib/otr-module');
+if(typeof exports !== 'undefined'){
+    var async = require("../lib/async");
+    var OTR = require("../lib/otr-module");
+}
 
-console.log("== loaded libotr version:",libotr.version());
+var otr = OTR;
 
-var TEST_PASSED=false;
+console.log("== loaded libotr version:",otr.version());
+
 var debug = function(){};
 
-process.argv.forEach(function(arg){
-    if(arg=="--verbose"){
-        libotr.debugOn();
-        debug = console.error;
-    }
-});
+var USE_VFS = false;
+var TEST_PASSED=false;
+var verbose =false;
+var FORCE_SMP = false;
+var SUCCESSFULL_SMP = false;
 
-var keys_dir = "";
+if(typeof process !== "undefined" ){
+ process.argv.forEach(function(arg){
+    if(arg=="--verbose") verbose = true;
+    if(arg=="--vfs") USE_VFS=true;
+    if(arg=="--force-smp") FORCE_SMP=true;
+ });
+}
 
-var alice = new libotr.User({name:'alice',keys:keys_dir+'/alice.keys',fingerprints:keys_dir+'/alice.fp',instags:keys_dir+'/alice.instags'});
+if(verbose){
+    otr.debugOn();
+    debug = console.error;
+}
+
+if(USE_VFS){
+    var VFS = otr.VFS(__dirname+"/default.vfs").load();
+}
+
+var keys_dir = ".";
+
+var alice = new otr.User({name:'alice',keys:keys_dir+'/alice.keys',fingerprints:keys_dir+'/alice.fp',instags:keys_dir+'/alice.instags'});
+if(!alice.state.fingerprint("alice@telechat.org","telechat")){
 alice.generateKey("alice@telechat.org","telechat",function(err){
     if(err){
         console.error("error generating key:",err);
@@ -26,11 +46,12 @@ alice.generateKey("alice@telechat.org","telechat",function(err){
 alice.generateInstag("alice@telechat.org","telechat",function(err,instag){
     console.log("generating instance tag: error=",err," tag=",instag);
 });
+}
 
 var BOB = alice.ConnContext("alice@telechat.org","telechat","BOB");
-var otrchan_a = new libotr.OTRChannel(alice, BOB,{policy:libotr.POLICY("DEFAULT"),secret:'s3cr37'});
-
-var bob = new libotr.User({name:'bob',keys:keys_dir+'/bob.keys',fingerprints:keys_dir+'/bob.fp',instags:keys_dir+'/bob.instags'});
+var otrchan_a = new otr.OTRChannel(alice, BOB,{policy:otr.POLICY("ALWAYS"),secret:'s3cr37'});
+var bob = new otr.User({name:'bob',keys:keys_dir+'/bob.keys',fingerprints:keys_dir+'/bob.fp',instags:keys_dir+'/bob.instags'});
+if(!bob.state.fingerprint("bob@telechat.org","telechat")){
 bob.generateKey("bob@telechat.org","telechat",function(err){
     if(err){
         console.error("error generating key:",err);
@@ -41,8 +62,9 @@ bob.generateKey("bob@telechat.org","telechat",function(err){
 bob.generateInstag("bob@telechat.org","telechat",function(err,instag){
     console.log("generating instance tag: error=",err," tag=",instag);
 });
+}
 var ALICE = bob.ConnContext("bob@telechat.org","telechat","ALICE");
-var otrchan_b = new libotr.OTRChannel(bob, ALICE,{policy:libotr.POLICY("DEFAULT"),secret:'s3cr37'});
+var otrchan_b = new otr.OTRChannel(bob, ALICE,{policy:otr.POLICY("ALWAYS"),secret:'s3cr37'});
 
 var NET_QUEUE_A = async.queue(handle_messages,1);
 var NET_QUEUE_B = async.queue(handle_messages,1);
@@ -100,7 +122,7 @@ otrchan_a.on("remote_disconnected",function(){
 
 otrchan_a.on("gone_secure",function(){
 
-    if(!this.isAuthenticated()){
+    if(!this.isAuthenticated() || FORCE_SMP ){
             console.log("Alice initiating SMP authentication to verify keys...");
             otrchan_a.start_smp();
     }
@@ -114,6 +136,7 @@ otrchan_b.on("smp_request",function(){
 
 otrchan_a.on("smp_complete",function(){
         otrchan_a.send("Hello Bob! - 2");
+        SUCCESSFULL_SMP = true;
 });
 //otrchan_a.connect();
 otrchan_a.send("Hello Bob! - 1");
@@ -122,7 +145,10 @@ otrchan_a.send("Hello Bob! - 1");
 
 var loop = setInterval(function(){
     console.log("_");
-    if(otrchan_a.isEncrypted() && otrchan_a.isAuthenticated()){
+    if(FORCE_SMP && !SUCCESSFULL_SMP){
+        return;
+    }
+    if(otrchan_a.isEncrypted() && otrchan_a.isAuthenticated() && otrchan_b.isEncrypted() && otrchan_b.isAuthenticated()){
         console.log("Finger print verification successful");
         dumpConnContext(otrchan_a,"Alice's ConnContext:");
         dumpConnContext(otrchan_b,"Bob's ConnContext:"); 
@@ -135,9 +161,11 @@ var loop = setInterval(function(){
 function exit_test(msg){
     console.log(msg);
     if(TEST_PASSED){ console.log("== TEST PASSED ==\n"); } else { console.log("== TEST FAILED ==\n"); }
+    if(VFS) VFS.save();
     process.exit();
 }
 
 function dumpConnContext(chan,msg){
     console.log(msg,"\n",chan.context.obj());
 }
+

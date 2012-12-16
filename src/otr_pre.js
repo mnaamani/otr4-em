@@ -1,19 +1,14 @@
 var Module = {};
 
 Module["preRun"]=[];
-/*
-Module["InitOTR"] = function(ConnContext){
-    Module["ConnContext"] = ConnContext;
-}
-*/
-//eliminate globals, hide them safely away from the closure compiler in 
-//Module["hide_me_here"]={
-//  "use double quotes":something()
-//};
 
 Module["MPI_HOOK"] = {};
 
-Module["MPI_HOOK"]["BigInt"]= require("./bigint");
+if (typeof exports !== 'undefined') {
+    Module["MPI_HOOK"]["BigInt"]= require("./bigint");
+}else{
+    Module["MPI_HOOK"]["BigInt"] = this["BigInt"];
+}
 
 /* emcc is generating this code when libgpg-error is compiled to js.. :(
 __ATINIT__ = __ATINIT__.concat([
@@ -22,81 +17,34 @@ __ATINIT__ = __ATINIT__.concat([
 */
 function _i32______gpg_err_init_to_void_____(){};//workaround.. TODO:investigate
 
-function __dump_profile(){
-}
-
-//wrap these in Module also?
 var _static_buffer_ptr;
 var _static_new_mpi_ptr_ptr;
 var gcry_ = {};
 var jsapi_ = {};
 var otrl_ = {};
+var helper_ = {};
 
 //todo:copy directly between memory and bigint array.. (faster than string conversions?..)
 function __mpi2bigint(mpi_ptr){
-//    console.log(">__mpi2bigint");
-  /*  if(inmpi2bigint){
-        console.log("OH OH! recursive mpi2bigint!");
-        process.exit();
-    }
-    inmpi2bigint=true;
-
-    if(mpi_ptr==0) {
-        console.log("mpi_ptr==0, in __mpi2bigint!");
-        process.exit();
-    }
-    */
-//    var buffer_ptr = _malloc(4);//char**
-//    var nbytes_ptr = _malloc(4)//int*
     var GCRYMPI_FMT_HEX = 4; //gcrypt.h:    GCRYMPI_FMT_HEX = 4,    /* Hex format. */
-    //gcry_error_t gcry_mpi_aprint (enum gcry_mpi_format format, unsigned char **buffer, size_t *nbytes, const gcry_mpi_t a)  
-    //console.log("calling gcry_mpi_aprint");
-//    var err = ccall('gcry_mpi_aprint','number',['number','number','number','number'],[GCRYMPI_FMT_HEX,buffer_ptr,0,mpi_ptr]);
-
     //gcry_error_t gcry_mpi_print (enum gcry_mpi_format format, unsigned char *buffer, size_t buflen, size_t *nwritten, const gcry_mpi_t a)
-    //var err = ccall('gcry_mpi_print','number',['number','number','number','number','number'],[GCRYMPI_FMT_HEX,_static_buffer_ptr,4096,0,mpi_ptr]);
     var err = gcry_.mpi_print(GCRYMPI_FMT_HEX,_static_buffer_ptr,4096,0,mpi_ptr);
 
-    //console.log("gcry_mpi_aprint returned:",err);
     if(err) {
        var strerr = gcry_.strerror(err);
        console.log("error in gcry_mpi_aprint:",strerr);     
        process.exit();
     }
-//    var mpi_str_ptr = getValue(buffer_ptr,"i32");
     var mpi_str_ptr = _static_buffer_ptr;
     var mpi_str = Module['Pointer_stringify'](mpi_str_ptr);
-//    console.log("MPI string converted:",mpi_str);
-//    _free(buffer_ptr);
-//    if(mpi_str_ptr>0) _free(mpi_str_ptr);  //not our buffer to free? or should be freed with gcry_free ?
-//    _free(nbytes_ptr);
 
-//    inmpi2bigint = false;
     return Module["MPI_HOOK"]["BigInt"]["str2bigInt"](mpi_str,16);   
 }
 
 function __bigint2mpi(mpi_ptr,bi_num){
-  //  console.log(">__bigint2mpi");
-
-    /*if(mpi_ptr==0) {
-        console.log("mpi_ptr==0, in __bigint2mpi!");
-        process.exit();
-    }
-    if(inbigint2mpi){
-        console.log("OH OH! recursive bigint2mpi!");
-        process.exit();
-    }
-    inbigint2mpi = true;
-    */
-    //convert bi_num to string.. and scan it into a new mpi using gcry_mpi_scan
-    //copy/set the new mpi to mpi_ptr
-    //var new_mpi_ptr_ptr = _malloc(4);//gcry_mpi_t*
     var new_mpi_ptr_ptr = _static_new_mpi_ptr_ptr;
-    //var nscanned_ptr = _malloc(4);//size_t*
     var bi_num_str = Module["MPI_HOOK"]["BigInt"]["bigInt2str"](bi_num,16);
-  //  console.log("converting bi_num to mpi:",bi_num_str);
     //gcry_error_t gcry_mpi_scan (gcry_mpi_t *r_mpi, enum gcry_mpi_format format, const unsigned char *buffer, size_t buflen, size_t *nscanned)
-    //var err = ccall('gcry_mpi_scan','number',['number','number','string','number','number'],[new_mpi_ptr_ptr,4,bi_num_str,0,nscanned_ptr]);
     var err = gcry_.mpi_scan(new_mpi_ptr_ptr,4,bi_num_str,0,0);
     if(err){
         var strerr = gcry_.strerror(err);
@@ -108,52 +56,35 @@ function __bigint2mpi(mpi_ptr,bi_num){
         console.log("NULL scanned mpi in bigint2mpi()");
         process.exit();
     }
-    //set new_mpi_ptr -> mpi_ptr
     //gcry_mpi_t gcry_mpi_set (gcry_mpi_t w, const gcry_mpi_t u)
-    //ccall('gcry_mpi_set','number',['number','number'],[mpi_ptr,new_mpi_ptr]);
-    
-    //todo check if mpi_ptr can store scanned_mpi.. otherwise expand it before we set
-    
     var same = gcry_.mpi_set(mpi_ptr,scanned_mpi_ptr);
-    //TODO: make a custom scanner that doesn't malloc new mpi   
+
     gcry_.mpi_release(scanned_mpi_ptr);
     if(same && same != mpi_ptr){
-        //console.log("unexpected: gcry_mpi_set created a new mpi!");
-        //process.exit();
         return same;
-    }
-        
-    //_free(new_mpi_ptr_ptr);
-    //_free(nscanned_ptr);
-
-    //inbigint2mpi = false;
+    }        
 }
 
 Module['preRun'].push(function(){
 
     Module["malloc"]=_malloc;
     Module["free"]=_free;
+    Module["FS"]=FS;
 
-    //select doesn't really have a place in a JS environment.. since i/o is non-blocking
+    //select doesn't really have a place in node environment.. since i/o is non-blocking
     _select = (function() {
       return 3;//this means all the three socket sets passed to the function are have sockets ready for reading.
     });
     
-    //Math.random = profile(Math.random);
-    //if entropy is low.. it will significantly increase time for crypto keygen..
-    //FS.createDevice("/dev/", "random", (function() {
     Module['FS_createDevice']("/dev/","random",(function(){
-      return Math.floor(Math.random() * 256);//just temporary.. need a platform specific implementation..
+      return Math.floor(Math.random() * 256);
     }));
 
-    //FS.createDevice("/dev/", "urandom", (function() {
     Module['FS_createDevice']("/dev/","urandom",(function(){
       return Math.floor(Math.random() * 256);
     }));
     console.error("created /dev/random and /dev/urandom devices.");
     
-//    _static_buffer_ptr = _malloc(4096);//verify _malloc works with closure compiler 
-//    _static_new_mpi_ptr_ptr = _malloc(4);
     _static_buffer_ptr = allocate(4096,"i8",ALLOC_STATIC); 
     _static_new_mpi_ptr_ptr = allocate(4,"i8",ALLOC_STATIC);
     _static_otr_error_message_str = allocate(512,"i8",ALLOC_STATIC);
@@ -183,7 +114,7 @@ Module['preRun'].push(function(){
     Module["libotrl"]["message_initiate_smp_q"]=otrl_.message_initiate_smp_q=cwrap('otrl_message_initiate_smp_q','',['number','number','number','number','string','string','number']);
     Module["libotrl"]["message_initiate_smp"]=otrl_.message_initiate_smp=cwrap('otrl_message_initiate_smp','',['number','number','number','number','string','number']);
     Module["libotrl"]["message_respond_smp"]=otrl_.message_respond_smp=cwrap('otrl_message_respond_smp','',['number','number','number','number','string','number']);
-    //newly used add to exported functions!
+    //new in libotr4
     Module["libotrl"]["message_abort_smp"]=otrl_.message_abort_smp=cwrap('otrl_message_abort_smp','',['number','number','number','number']);
     Module["libotrl"]["message_receiving"]=otrl_.message_receiving=cwrap('otrl_message_receiving','number',['number','number','number','string','string','string','string','number','number','number','number','number']);
     Module["libotrl"]["instag_generate"]=otrl_.instag_generate=cwrap('otrl_instag_generate','number',['number','string','string','string']);
@@ -207,12 +138,15 @@ Module['preRun'].push(function(){
     Module["jsapi"]["conncontext_get_trust"]=jsapi_.conncontext_get_trust = cwrap('jsapi_conncontext_get_trust','string',['number']);
     Module["jsapi"]["initialise"]=jsapi_.initialise = cwrap('jsapi_initialise');
     Module["jsapi"]["messageappops_new"]=jsapi_.messageappops_new = cwrap('jsapi_messageappops_new','number');
-    //new jsapi functions to add to exported_funcs
+    //new in libotr4
     Module["jsapi"]["conncontext_get_their_instance"]=jsapi_.conncontext_get_their_instance = cwrap('jsapi_conncontext_get_their_instance','number',['number']);
     Module["jsapi"]["conncontext_get_our_instance"]=jsapi_.conncontext_get_our_instance = cwrap('jsapi_conncontext_get_our_instance','number',['number']);
     Module["jsapi"]["conncontext_get_master"]=jsapi_.conncontext_get_master = cwrap('jsapi_conncontext_get_master','number',['number']);
     Module["jsapi"]["instag_get_tag"]=jsapi_.instag_get_tag = cwrap('jsapi_instag_get_tag','number',['number']);
 
+    Module["helper"]={};
+    Module["helper"]["mpi2bigint"] = helper_.mpi2bigint = __mpi2bigint;
+    Module["helper"]["bigint2mpi"] = helper_.bigint2mpi = __bigint2mpi;
 
 if(true){
 // some of the MPI calculations are slow
@@ -360,18 +294,13 @@ if(true){
                              int (*extra_check)(void *, gcry_mpi_t),
                              void *extra_check_arg);*/
     _gen_prime = function BigInt_Prime(nbits,secretlevel,randomlevel,xtracheck,xtracheck_args){
-        //    console.log(">_gen_prime()");
         var mpi_prime = gcry_.mpi_new ( nbits );
-        //console.log(">gcry_.mpi_new(",nbits,") returned.");
         for(;;){
             var bi_prime = Module["MPI_HOOK"]["BigInt"]["randTruePrime"](nbits);
-            //console.log(">BI.randTruePrime(",nbits,") returned.");
             __bigint2mpi(mpi_prime,bi_prime);
-            //if(xtracheck && jsapi_.docallback_prime_check(xtracheck,xtracheck_args,mpi_prime) ) {
             if(xtracheck && FUNCTION_TABLE[xtracheck](xtracheck_args,mpi_prime)){                
                    continue;//prime rejected!                
             }
-            //console.log("returning from _gen_prime()");
             return mpi_prime;
         }
     };
@@ -389,19 +318,15 @@ function __msgops_callback_smp_request($opdata,$context,$question){
     Module["ops_event"]($opdata, obj, "smp_request");
 }
 function __msgops_callback_smp_failed($opdata,$context){
-    //console.log("__msgops_callback_smp_failed");
     Module["ops_event"]($opdata, (new Module["ConnContext"]($context))["obj"](),"smp_failed");
 }
 function __msgops_callback_smp_aborted($opdata,$context){
-    //console.log("__msgops_callback_smp_aborted");
     Module["ops_event"]($opdata, (new Module["ConnContext"]($context))["obj"](),"smp_aborted");
 }
 function __msgops_callback_smp_complete($opdata,$context){
-    //console.log("__msgops_callback_smp_compelte");
     Module["ops_event"]($opdata, (new Module["ConnContext"]($context))["obj"](),"smp_complete");
 }
 function __msgops_callback_smp_error($opdata,$context){
-    //console.log("__msgops_callback_smp_error");
     Module["ops_event"]($opdata, (new Module["ConnContext"]($context))["obj"](),"smp_error");    
 }
 

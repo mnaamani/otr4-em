@@ -16,29 +16,17 @@ EXPORTED_FUNCS= -s EXPORTED_FUNCTIONS="['_gcry_strerror','_malloc','_free','__gc
             '_otrl_message_receiving', '_otrl_instag_generate', '_jsapi_conncontext_get_their_instance', '_jsapi_conncontext_get_our_instance', \
             '_jsapi_conncontext_get_master', '_otrl_instag_read', '_otrl_instag_write', '_otrl_instag_find', '_jsapi_instag_get_tag' ]"
 
-OPTIMISATION_OFF= -O0 --closure 0 --llvm-opts 0 --minify 0 -s LINKABLE=1
-#O2 optimisation causing some bugs: Ohhhh jeeee: ... this is a bug (cipher.c:326:cipher_register_default)
-#llvm optimisations slowdown compilation and dont provide noticable speedup.
-OPTIMISATION_ON= -O1 --closure 1 --llvm-opts 0 --minify 0 -s LINKABLE=1 $(EXPORTED_FUNCS)
-
-OPTIMISATION= $(OPTIMISATION_OFF)
-
-module:
-	mkdir -p $(BUILD_DIR)/
-	$(EMCC) src/jsapi.c -I$(CRYPTO_BUILD)/include -lotr -L$(CRYPTO_BUILD)/lib \
-        -o $(BUILD_DIR)/libotr4.js \
-		--pre-js src/otr_pre.js \
-        --post-js src/otr_post.js \
-		-s TOTAL_MEMORY=1048576  -s TOTAL_STACK=409600 \
-        $(OPTIMISATION)
+OPTIMISATION= -O2 --closure 0 --llvm-opts 1 --minify 0 -s LINKABLE=1 $(EXPORTED_FUNCS)
 
 module-optimised:
 	mkdir -p $(BUILD_DIR)/
-	cp src/otr_post.js $(BUILD_DIR)/libotr4.js
+	cp src/header.js $(BUILD_DIR)/_libotr4.js
 	$(EMCC) src/jsapi.c -I$(CRYPTO_BUILD)/include -lotr -L$(CRYPTO_BUILD)/lib \
-        -o $(BUILD_DIR)/_libotr4.js \
-		--pre-js src/otr_pre.js \
-		-s TOTAL_MEMORY=1048576  -s TOTAL_STACK=409600 \
-        $(OPTIMISATION_ON)
-	cat $(BUILD_DIR)/_libotr4.js >> $(BUILD_DIR)/libotr4.js
-	rm $(BUILD_DIR)/_libotr4.js
+        -o $(BUILD_DIR)/libotr4_tmp.js \
+        --pre-js src/otr_pre.js \
+        -s TOTAL_MEMORY=1048576  -s TOTAL_STACK=409600 \
+        $(OPTIMISATION)
+	cat $(BUILD_DIR)/libotr4_tmp.js >> $(BUILD_DIR)/_libotr4.js
+	cat src/footer.js >> $(BUILD_DIR)/_libotr4.js
+	mv $(BUILD_DIR)/_libotr4.js $(BUILD_DIR)/libotr4.js
+	rm $(BUILD_DIR)/libotr4_tmp.js
