@@ -29,7 +29,7 @@ if(verbose){
 }
 
 if(USE_VFS){
-    var VFS = otr.VFS(__dirname+"/default.vfs").load();
+    var VFS = otr.VFS("./default.vfs").load();
 }
 
 var keys_dir = ".";
