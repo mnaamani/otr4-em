@@ -35,7 +35,7 @@ if(USE_VFS){
 var keys_dir = ".";
 
 var alice = new otr.User({name:'alice',keys:keys_dir+'/alice.keys',fingerprints:keys_dir+'/alice.fp',instags:keys_dir+'/alice.instags'});
-if(!alice.state.fingerprint("alice@telechat.org","telechat")){
+if(!alice.findKey("alice@telechat.org","telechat")){
 alice.generateKey("alice@telechat.org","telechat",function(err){
     if(err){
         console.error("error generating key:",err);
@@ -51,7 +51,7 @@ alice.generateInstag("alice@telechat.org","telechat",function(err,instag){
 var BOB = alice.ConnContext("alice@telechat.org","telechat","BOB");
 var otrchan_a = new otr.OTRChannel(alice, BOB,{policy:otr.POLICY("ALWAYS"),secret:'s3cr37'});
 var bob = new otr.User({name:'bob',keys:keys_dir+'/bob.keys',fingerprints:keys_dir+'/bob.fp',instags:keys_dir+'/bob.instags'});
-if(!bob.state.fingerprint("bob@telechat.org","telechat")){
+if(!bob.findKey("bob@telechat.org","telechat")){
 bob.generateKey("bob@telechat.org","telechat",function(err){
     if(err){
         console.error("error generating key:",err);
