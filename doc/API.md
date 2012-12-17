@@ -1,4 +1,5 @@
-#### OTR4-em - Off-the-Record Messaging [emscripten]
+OTR4-em - Off-the-Record Messaging [emscripten]
+=====================
 
 ## Getting started
 
@@ -20,7 +21,7 @@ The User object is used to manage a user's accounts (public keys) and known fing
     var user = new otr.User({ 
         keys:'/alice.keys',      //path to OTR keys file (required)
         fingerprints:'/alice.fp' //path to fingerprints file (required)
-        instags:'/alice.instags' //path to instance tags file (required if using protocol v3)
+        instags:'/alice.instags' //path to instance tags file (required)
     });
 
 All data is loaded in memory (UserState) and persisted on the virtual file system VFS().
@@ -41,14 +42,16 @@ We can check what accounts have been load..
 	    fingerprint: '65D366AF CF9B065F 41708CB0 1DC26F61 D3DF5935',
 	    privkey: [Object] } ]
 
-### user.generateKey(accountname,protocol,function callback(err) )
+### user.generateKey(accountname,protocol,function (err,privkey) )
 
 To generate an OTR key for a given accountname and protocol:
 (If a key already exists it will be overwritten)
 
-    user.generateKey("alice@jabber.org", "xmpp", function(err){
+    user.generateKey("alice@jabber.org", "xmpp", function(err, privkey){
         if(err){
         	console.log("something went wrong!",err.message);
+        }else{
+        	console.log("Generated Key Successfully:",privkey.exportPublic() );
         }
     });
 
@@ -73,6 +76,14 @@ returns
 
 	'65D366AF CF9B065F 41708CB0 1DC26F61 D3DF5935'
 
+### user.findKey(accountname,protocol)
+Returns an OtrlPrivKey() instance if it exists. (null otherwise)
+	
+	var privkey = user.findKey("alice@jabber.org","xmpp");
+
+### user.deleteKey(accountname,protocol)
+Deleted a key from memory and file if it exists.
+
 ### user.ConnContext(accountname, protocol, buddy_name)
 Create a ConnContext(). accountname and protocol will select the key to use in this context, and buddy_name 
 is our chosen name for the remote party which is stored in the fingerprints file.
@@ -80,30 +91,78 @@ is our chosen name for the remote party which is stored in the fingerprints file
 ### user.writeFingerprints()
 Writes fingerprints out to file.
 
+### user.writeKeys()
+Writes keys out to file.
+
+### user.prototype.exportKeyHex(accountname,protocol)
+Exports the DSA key for the account/protocol. (Can be imported to another User using user.importKey())
+
+### user.prototype.exportKeyBigInt(accountname,protocol)
+Exports the DSA key for the account/protocol. (Can be imported to another User using user.importKey())
+
+### user.prototype.importKey(accountname,protocol,dsa)
+Will import a DSA key (exported using user.exportKeyHex or user.exportBigInt) and assign it to accountname/protocol.
+
 ## OtrlPrivKey()
-This is the 'key' object returned in user.accounts() and user.generateKey().
+This is the 'privkey' object returned user.findKey() and inthe callback of user.accounts() and user.generateKey().
 
 **privkey.accountname()** - Accountname the key is associated with.
+
 **privkey.protocol()** - Protocol the key is associated with.
 
-## ConnContext()
+**privkey.export(format)** - Exports the private DSA key. format can be "HEX" or "BIGINT"
+
+**privkey.exportPublic(format)** - Exports only the public components of the DSA key. format can be "HEX" or "BINGINT"
+
+
+## otr.ConnContext()
 A ConnContext with buddy 'BOB' is created from a User() object. The last argument is
 our selected name for buddy Bob.
 
     var context = user.ConnContext("alice@jabber.org","xmpp","BOB");
 
-The following methods of the ConnContext() expose it's internal state:
+To get the state of a ConnContext:
 
-* protocol(): string: eg. "xmpp"
-* username(): string: name we have given to buddy "BOB"
-* accountname(): string: account name of the otr key, eg. "alice@jabber.org"
-* fingerprint(): string: fingerprint of buddy in an active Session()
-* protocol_version(): number: otr protocol version in use, eg. 3
-* msgstate(): number: 0 = plaintext, 1 = encrypted
-* smstate: number: current state of the SMP (Socialist Millionaire's Protocol)
-* trust(): string: 'smp' if buddy's fingerprint has been verified by SMP.
-* their_instance(): instance tag of buddy
-* our_instance(): our instance tag
+**context.protocol()**
+
+returns string: protocol name
+
+**context.username()**
+
+return string: name we have given to buddy "BOB"
+
+**context.accountname()**
+
+return string: account name of the otr key, eg. "alice@jabber.org"
+
+**context.fingerprint()**
+
+return string: fingerprint of buddy in an active Session()
+
+**context.protocol_version()**
+
+return number: otr protocol version in use, eg. 3
+
+**context.msgstate()**
+
+returns number: 0 = plaintext, 1 = encrypted
+
+**context.smstate()**
+
+returns number: current state of the SMP (Socialist Millionaire's Protocol)
+
+**context.trust()**
+
+returns string: 'smp' if buddy's fingerprint has been verified by SMP.
+
+**context.their_instance()**
+
+returns number: instance tag of buddy
+
+**context.our_instance()**
+
+returns number: our instance tag
+
 
 ## otr.Session()
 
@@ -111,9 +170,9 @@ To setup an OTR conversation with a buddy, create a Session(). As arguments
 it takes a User, ConnContext, and a set of parameters for the session. Session instances
 are event emitters.
 
-**Setting up a Session()**
+###Setting up a Session()###
 
-    var session = new otr.Session(alice, BOB, {
+    var session = new otr.Session(user, context, {
         policy: otr.POLICY("ALWAYS"), //optional policy - default = otr.POLICY("DEFAULT")
         MTU: 5000,          //optional - max fragment size in bytes - default=0,no-fragmentation
         secret: "SECRET",   //secret for SMP authentication.                           
@@ -121,45 +180,53 @@ are event emitters.
                   'question-2':'secret-2'} //questions,answers pairs for SMP Authentication.
     });
 
-**Starting and Ending an OTR conversation**
+### Starting and Ending an OTR conversation
 
-### session.connect()
-connect() will initiate the otr protocol
-This can be used if we wish to initiate the protocol without sending an actual message.
+**session.connect()**
 
-### session.close()
-close() will end the otr session.
+Initiates the otr protocol. This can be used if we wish to initiate the protocol without sending an actual message.
 
-**Exchanging Messages**
+**session.close()**
 
-### session.send(message,[instag])
-send() will fragment and send message.toString(). Optional instag can be specified.
+End the session.
 
-### session.recv(message)
-call recv() when receiving message
+###Exchanging Messages
 
-**Authenticating with SMP (Socialist Millionaire's Protocol)**
+**session.send(message,[instag])**
 
-### session.start_smp([secret])
-starts SMP authentication. If otional [secret] is not passed it is taken from the parameters.
+Fragment and send message.toString(). Optional instag can be specified.
 
-### session.start_smp_question(question,[secret])
-start SMP authentication with a question and optional [secret]. If secret is not passed 
+**session.recv(message)**
+
+Should be called when receiving a message from buddy.
+
+###Authenticating with SMP (Socialist Millionaire's Protocol)
+
+**session.start_smp([secret])**
+
+Starts SMP authentication. If otional [secret] is not passed it is taken from the parameters.
+
+**session.start_smp_question(question,[secret])**
+
+Starts SMP authentication with a question and optional [secret]. If secret is not passed 
 it is taken from the parameters.
 
-### session.respond_smp([secret])
-responds to SMP authentication request with optional [secret]. If secret is not passed 
+**session.respond_smp([secret])**
+
+Responds to SMP authentication request with optional [secret]. If secret is not passed 
 it is taken from the parameters.
 
-**At anytime we can check encryption and trust level of the session**
+### State of a Session
 
-### session.isEncrypted()
-returns true only if current session is encrypted.
+**session.isEncrypted()**
 
-### session.isAuthenticated()
-return true only if the fingerprint of the buddy has been authenticated/verified by SMP.
+True only if current session is encrypted.
 
-**Handling Session events**
+**session.isAuthenticated()**
+
+True only if the fingerprint of the buddy has been authenticated/verified by SMP.
+
+### Handling Session events
 
 * message(msg) - received decrypted 'msg' message.
 
@@ -184,26 +251,25 @@ return true only if the fingerprint of the buddy has been authenticated/verified
 
 * msg_event(event_no, message, err) - event_no, message if appropriate and a GcryptError() err
 
-## otr.MSGEVENT(event_no)
+## otr.MSGEVENT(event_number)
+Returns on of the corresponding event names below of event_number
 
-[
-    "NONE",
-    "ENCRYPTION_REQUIRED",
-    "ENCRYPTION_ERROR",
-    "CONNECTION_ENDED",     //not returned - remote_disconnected event is fired instead.
-    "SETUP_ERROR",
-    "MSG_REFLECTED",
-    "MSG_RESENT",
-    "RCVDMSG_NOT_IN_PRIVATE",
-    "RCVDMSG_UNREADABLE",
-    "RCVDMSG_MALFORMED",
-    "LOG_HEARTBEAT_RCVD",
-    "LOG_HEARTBEAT_SENT",
-    "RCVDMSG_GENERAL_ERR",
-    "RCVDMSG_UNENCRYPTED",  //not returned - message event is fired instead.
-    "RCVDMSG_UNRECOGNIZED",
-    "RCVDMSG_FOR_OTHER_INSTANCE"
-];
+    NONE
+    ENCRYPTION_REQUIRED
+    ENCRYPTION_ERROR
+    CONNECTION_ENDED   //internally 'remote_disconnected' event is fired instead of msg_event
+    SETUP_ERROR
+    MSG_REFLECTED
+    MSG_RESENT
+    RCVDMSG_NOT_IN_PRIVATE
+    RCVDMSG_UNREADABLE
+    RCVDMSG_MALFORMED
+    LOG_HEARTBEAT_RCVD
+    LOG_HEARTBEAT_SENT
+    RCVDMSG_GENERAL_ERR
+    RCVDMSG_UNENCRYPTED  //internally 'message' event is fired instead of msg_event
+    RCVDMSG_UNRECOGNIZED
+    RCVDMSG_FOR_OTHER_INSTANCE
 
 ## otr.POLICY(name)
 
@@ -212,22 +278,22 @@ The policy is used as a parameter when setting up a Session().
     var otr = require("otr4-em");
     var policy = otr.POLICY("DEFAULT");
 
-	//available policies
-    'NEVER'
-    'ALLOW_V1'
-    'ALLOW_V2'
-    'ALLOW_V3'
-    'REQUIRE_ENCRYPTION'
-    'SEND_WHITESPACE_TAG'
-    'WHITESPACE_START_AKE'
-    'ERROR_START_AKE'
-	'VERSION_MASK'
-	'OPPORTUNISTIC'
-	'MANUAL'
-	'ALWAYS'
-	'DEFAULT'
+    //available policies
+    NEVER
+    ALLOW_V1
+    ALLOW_V2
+    ALLOW_V3
+    REQUIRE_ENCRYPTION
+    SEND_WHITESPACE_TAG
+    WHITESPACE_START_AKE
+    ERROR_START_AKE
+    VERSION_MASK
+    OPPORTUNISTIC
+    MANUAL
+    ALWAYS
+    DEFAULT
 
-## VFS() - The Virtual File System
+## otr.VFS() - The Virtual File System
 The Virtual File System (vfs) can be easily serialed to JSON for simple import and export to persist key and fingerprint files.
 
      var VFS = otr.VFS();
