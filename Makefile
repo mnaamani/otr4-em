@@ -16,7 +16,7 @@ EXPORTED_FUNCS= -s EXPORTED_FUNCTIONS="['_gcry_strerror','_malloc','_free','__gc
             '_otrl_message_receiving', '_otrl_instag_generate', '_jsapi_conncontext_get_their_instance', '_jsapi_conncontext_get_our_instance', \
             '_jsapi_conncontext_get_master', '_otrl_instag_read', '_otrl_instag_write', '_otrl_instag_find', '_jsapi_instag_get_tag', \
             '_otrl_privkey_forget','_otrl_privkey_forget_all', '_otrl_privkey_find', '_jsapi_privkey_delete', '_jsapi_privkey_get_dsa_token', \
-            '_jsapi_userstate_import_privkey','_jsapi_userstate_write_to_file' ]"
+            '_jsapi_userstate_import_privkey','_jsapi_userstate_write_to_file','_otrl_message_symkey' ]"
 
 #closure compiler makes exported VFS unusable..
 OPTIMISATION= -O2 --closure 0 --llvm-opts 1 --minify 0 -s LINKABLE=1 $(EXPORTED_FUNCS)

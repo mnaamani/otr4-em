@@ -24,49 +24,6 @@ var jsapi_ = {};
 var otrl_ = {};
 var helper_ = {};
 
-//todo:copy directly between memory and bigint array.. (faster than string conversions?..)
-function __mpi2bigint(mpi_ptr){
-    var GCRYMPI_FMT_HEX = 4; //gcrypt.h:    GCRYMPI_FMT_HEX = 4,    /* Hex format. */
-    //gcry_error_t gcry_mpi_print (enum gcry_mpi_format format, unsigned char *buffer, size_t buflen, size_t *nwritten, const gcry_mpi_t a)
-    var err = gcry_.mpi_print(GCRYMPI_FMT_HEX,_static_buffer_ptr,4096,0,mpi_ptr);
-
-    if(err) {
-//       var strerr = gcry_.strerror(err);
-//       console.log("mpi2bigint() error in gcry_mpi_print:",strerr);
-//       process.exit();
-        throw new GcryptError(err);
-    }
-    var mpi_str_ptr = _static_buffer_ptr;
-    var mpi_str = Module['Pointer_stringify'](mpi_str_ptr);
-
-    return Module["MPI_HOOK"]["BigInt"]["str2bigInt"](mpi_str,16);   
-}
-
-function __bigint2mpi(mpi_ptr,bi_num){
-    var new_mpi_ptr_ptr = _static_new_mpi_ptr_ptr;
-    var bi_num_str = Module["MPI_HOOK"]["BigInt"]["bigInt2str"](bi_num,16);
-    //gcry_error_t gcry_mpi_scan (gcry_mpi_t *r_mpi, enum gcry_mpi_format format, const unsigned char *buffer, size_t buflen, size_t *nscanned)
-    var err = gcry_.mpi_scan(new_mpi_ptr_ptr,4,bi_num_str,0,0);
-    if(err){
-//        var strerr = gcry_.strerror(err);
-//        console.log("bigint2mpi error in gcry_mpi_scan:",strerr);
-//        process.exit();
-        throw new GcryptError(err);
-    }
-    var scanned_mpi_ptr = getValue(new_mpi_ptr_ptr,"i32");
-    if(scanned_mpi_ptr==0){
-        console.log("NULL scanned mpi in bigint2mpi()");
-        process.exit();
-    }
-    //gcry_mpi_t gcry_mpi_set (gcry_mpi_t w, const gcry_mpi_t u)
-    var same = gcry_.mpi_set(mpi_ptr,scanned_mpi_ptr);
-
-    gcry_.mpi_release(scanned_mpi_ptr);
-    if(same && same != mpi_ptr){
-        return same;
-    }        
-}
-
 Module['preRun'].push(function(){
 
     Module["malloc"]=_malloc;
@@ -119,19 +76,23 @@ Module['preRun'].push(function(){
     Module["libotrl"]["message_initiate_smp_q"]=otrl_.message_initiate_smp_q=cwrap('otrl_message_initiate_smp_q','',['number','number','number','number','string','string','number']);
     Module["libotrl"]["message_initiate_smp"]=otrl_.message_initiate_smp=cwrap('otrl_message_initiate_smp','',['number','number','number','number','string','number']);
     Module["libotrl"]["message_respond_smp"]=otrl_.message_respond_smp=cwrap('otrl_message_respond_smp','',['number','number','number','number','string','number']);
-    //new in libotr4
     Module["libotrl"]["message_abort_smp"]=otrl_.message_abort_smp=cwrap('otrl_message_abort_smp','',['number','number','number','number']);
     Module["libotrl"]["message_receiving"]=otrl_.message_receiving=cwrap('otrl_message_receiving','number',['number','number','number','string','string','string','string','number','number','number','number','number']);
     Module["libotrl"]["instag_generate"]=otrl_.instag_generate=cwrap('otrl_instag_generate','number',['number','string','string','string']);
     Module["libotrl"]["instag_read"]=otrl_.instag_read=cwrap('otrl_instag_read','number',['number','string']);
     Module["libotrl"]["instag_write"]=otrl_.instag_write=cwrap('otrl_instag_write','number',['number','string']);
     Module["libotrl"]["instag_find"]=otrl_.instag_find=cwrap('otrl_instag_find','number',['number','string','string']);
+    Module["libotrl"]["message_symkey"]=otrl_.message_symkey = cwrap('otrl_message_symkey','number',['number','number','number','number','number','number','number','number']);
 
     Module["jsapi"]={};    
     Module["jsapi"]["can_start_smp"]=jsapi_.can_start_smp = cwrap('jsapi_can_start_smp','number',['number']);
     Module["jsapi"]["privkey_get_next"]=jsapi_.privkey_get_next = cwrap("jsapi_privkey_get_next",'number',['number']);
     Module["jsapi"]["privkey_get_accountname"]=jsapi_.privkey_get_accountname = cwrap("jsapi_privkey_get_accountname",'string',['number']);
     Module["jsapi"]["privkey_get_protocol"]=jsapi_.privkey_get_protocol = cwrap("jsapi_privkey_get_protocol",'string',['number']);
+    Module["jsapi"]["privkey_delete"]=jsapi_.privkey_delete = cwrap('jsapi_privkey_delete','',['number','string','string','string']);
+    Module["jsapi"]["privkey_get_dsa_token"]=jsapi_.privkey_get_dsa_token = cwrap('jsapi_privkey_get_dsa_token','number',['number','string','number','number']);
+    Module["jsapi"]["userstate_import_privkey"]=jsapi_.userstate_import_privkey = cwrap('jsapi_userstate_import_privkey','number',['number','string','string','number','number','number','number','number']);
+    Module["jsapi"]["userstate_write_to_file"]=jsapi_.userstate_write_to_file = cwrap('jsapi_userstate_write_to_file','number',['number','string']);
     Module["jsapi"]["userstate_get_privkey_root"]=jsapi_.userstate_get_privkey_root = cwrap("jsapi_userstate_get_privkey_root","number",["number"]);
     Module["jsapi"]["conncontext_get_protocol"]=jsapi_.conncontext_get_protocol =cwrap('jsapi_conncontext_get_protocol','string',['number']);
     Module["jsapi"]["conncontext_get_username"]=jsapi_.conncontext_get_username =cwrap('jsapi_conncontext_get_username','string',['number']);
@@ -141,27 +102,26 @@ Module['preRun'].push(function(){
     Module["jsapi"]["conncontext_get_smstate"]=jsapi_.conncontext_get_smstate =cwrap('jsapi_conncontext_get_smstate','number',['number']);
     Module["jsapi"]["conncontext_get_active_fingerprint"]=jsapi_.conncontext_get_active_fingerprint =cwrap('jsapi_conncontext_get_active_fingerprint','',['number','number']);
     Module["jsapi"]["conncontext_get_trust"]=jsapi_.conncontext_get_trust = cwrap('jsapi_conncontext_get_trust','string',['number']);
-    Module["jsapi"]["initialise"]=jsapi_.initialise = cwrap('jsapi_initialise');
-    Module["jsapi"]["messageappops_new"]=jsapi_.messageappops_new = cwrap('jsapi_messageappops_new','number');
-    Module["jsapi"]["privkey_delete"]=jsapi_.privkey_delete = cwrap('jsapi_privkey_delete','',['number','string','string','string']);
-    Module["jsapi"]["privkey_get_dsa_token"]=jsapi_.privkey_get_dsa_token = cwrap('jsapi_privkey_get_dsa_token','number',['number','string','number','number']);
-    Module["jsapi"]["userstate_import_privkey"]=jsapi_.userstate_import_privkey = cwrap('jsapi_userstate_import_privkey','number',['number','string','string','number','number','number','number','number']);
-    Module["jsapi"]["userstate_write_to_file"]=jsapi_.userstate_write_to_file = cwrap('jsapi_userstate_write_to_file','number',['number','string']);
- 
-    //new in libotr4
     Module["jsapi"]["conncontext_get_their_instance"]=jsapi_.conncontext_get_their_instance = cwrap('jsapi_conncontext_get_their_instance','number',['number']);
     Module["jsapi"]["conncontext_get_our_instance"]=jsapi_.conncontext_get_our_instance = cwrap('jsapi_conncontext_get_our_instance','number',['number']);
     Module["jsapi"]["conncontext_get_master"]=jsapi_.conncontext_get_master = cwrap('jsapi_conncontext_get_master','number',['number']);
+    Module["jsapi"]["messageappops_new"]=jsapi_.messageappops_new = cwrap('jsapi_messageappops_new','number');
     Module["jsapi"]["instag_get_tag"]=jsapi_.instag_get_tag = cwrap('jsapi_instag_get_tag','number',['number']);
+    Module["jsapi"]["initialise"]=jsapi_.initialise = cwrap('jsapi_initialise');
 
     Module["helper"]={};
     Module["helper"]["mpi2bigint"] = helper_.mpi2bigint = __mpi2bigint;
     Module["helper"]["bigint2mpi"] = helper_.bigint2mpi = __bigint2mpi;
+    Module["helper"]["ptr_to_ArrayBuffer"] = helper_.ptr_to_ArrayBuffer = ptr_to_ArrayBuffer;
+    Module["helper"]["ptr_to_HexString"] = helper_.ptr_to_HexString = ptr_to_HexString;
+    Module["helper"]["unsigned_char"] = helper_.unsigned_char = unsigned_char;
+    Module["helper"]["unsigned_int32"] = helper_.unsigned_int32 = unsigned_int32;
+    Module["helper"]["str2ab"] = helper_.str2ab = str2ab;
+    Module["helper"]["ab2str"] = helper_.ab2str = ab2str;
 
-if(true){
+
 // some of the MPI calculations are slow
 // can we use pure javascript crypto and still preserve the libgcrypt API?
-
 /* native alot faster don't override
         __gcry_mpi_add = function BigInt_MPI_ADD(w,u,v){
             var ww = BI.add( __mpi2bigint(u), __mpi2bigint(v) );
@@ -180,7 +140,6 @@ if(true){
             __bigint2mpi(w,ww);
         };
 */
-
 /*
 //void gcry_mpi_mul_2exp (gcry_mpi_t w, gcry_mpi_t u, unsigned long e)
 //w = u * 2^e.
@@ -189,8 +148,6 @@ if(true){
        
     };
 */
-
-
 //_gcry_mpi_tdiv_qr( gcry_mpi_t quot, gcry_mpi_t rem, gcry_mpi_t num, gcry_mpi_t den)
 /** !!!!!!! EL GAMAL FAILS in pubkey.js test!!!! so does ECC DSA!!
     __gcry_mpi_tdiv_qr = function BigInt_MPI_DIVIDE_(mpi_quot,mpi_rem,mpi_num,mpi_den){
@@ -314,14 +271,9 @@ if(true){
             return mpi_prime;
         }
     };
-}
-});
 
-/*
-function __msgops_callback_remote_disconnected($opdata,$context){
-    Module["ops_event"]($opdata, (new Module["ConnContext"]($context))["obj"](),"remote_disconnected");
-}
-*/
+});//preRun
+
 function __msgops_callback_smp_request($opdata,$context,$question){
     var obj = (new Module["ConnContext"]($context))["obj"]();
     if($question!=0) obj["question"] = Module["Pointer_stringify"]($question);
@@ -384,47 +336,34 @@ function __msgops_callback_max_message_size($opdata,$context){
 }
 
 //new ops in libotr4
-/*
-void msgops_callback_received_symkey(void *opdata, ConnContext *context,
-        unsigned int use, const unsigned char *usedata,
-        size_t usedatalen, const unsigned char *symkey){
-}
-*/
 function __msgops_callback_received_symkey($opdata,$context,$use,$usedata,$usedatalen,$symkey){
+    Module["ops_event"]($opdata,{
+        "use": $use,
+        "usedata":ptr_to_ArrayBuffer($usedata,$usedatalen),
+        "key":ptr_to_ArrayBuffer($symkey,32)
+    },"received_symkey")
+
+/* for debugging..
+    Module["ops_event"]($opdata,{
+        "use": $use,
+        "usedata":ab2str(ptr_to_ArrayBuffer($usedata,$usedatalen)),
+        "key":ptr_to_HexString($symkey,32)
+    },"received_symkey")
+*/
 }
 
-/*
-const char * msgops_callback_otr_error_message(void *opdata, ConnContext *context, OtrlErrorCode err_code){
-}
-*/
+/*const char * msgops_callback_otr_error_message(void *opdata, ConnContext *context, OtrlErrorCode err_code){}*/
 function __msgops_callback_otr_error_message($opdata, $context, $err_code){
     //TODO:write error string into _static_otr_error_message_str
     //for now this is implemented in jsapi.c
     return _static_otr_error_message_str;
 }
-/*
-void msgops_callback_otr_error_message_free(void *opdata, const char *err_msg){
-}
-*/
+
+/*void msgops_callback_otr_error_message_free(void *opdata, const char *err_msg){}*/
 function __msgops_callback_otr_error_message_free($opdata, $err_msg){
     //no need to free anything.. we are using a statically allocated shared memory location.
 }
-/*
-void msgops_callback_handle_smp_event(void *opdata, OtrlSMPEvent smp_event,
-        ConnContext *context, unsigned short progress_percent,
-        char *question){
-}
-*/
-/** handle this in jsapi.c instead..
-function __msgops_callback_handle_smp_event($opdata,$smp_event,$context,$progress_percent,$question){
-}
-*/
-/*
-void msgops_callback_handle_msg_event(void *opdata, OtrlMessageEvent msg_event,
-        ConnContext *context, const char *message,
-        gcry_error_t err){
-}
-*/
+
 function __msgops_callback_handle_msg_event($opdata, $msg_event,$context, $message, $err){
     Module["ops_event"]($opdata,{
         "event":$msg_event,
@@ -432,17 +371,14 @@ function __msgops_callback_handle_msg_event($opdata, $msg_event,$context, $messa
         "err": ($err? new GcryptError($err):null)
     },"msg_event");
 }
-/*
-void msgops_callback_create_instag(void *opdata, const char *accountname,
-        const char *protocol){
-}*/
+
 function __msgops_callback_create_instag($opdata, $accountname, $protocol){
     Module["ops_event"]($opdata,{
         "accountname":Module["Pointer_stringify"]($accountname),
         "protocol":Module["Pointer_stringify"]($protocol)
     },"create_instag");
 }
-/*
+/* TODO
 void msgops_callback_convert_msg(void *opdata, ConnContext *context,
         OtrlConvertType convert_type, char ** dest, const char *src){
     _msgops_callback_convert_msg(opdata, context, convert_type, dest, src);
@@ -455,9 +391,95 @@ void msgops_callback_timer_control(void *opdata, unsigned int interval){
 }
 */
 
+//todo:copy directly between memory and bigint array.. (faster than string conversions?..)
+function __mpi2bigint(mpi_ptr){
+    var GCRYMPI_FMT_HEX = 4; //gcrypt.h:    GCRYMPI_FMT_HEX = 4,    /* Hex format. */
+    //gcry_error_t gcry_mpi_print (enum gcry_mpi_format format, unsigned char *buffer, size_t buflen, size_t *nwritten, const gcry_mpi_t a)
+    var err = gcry_.mpi_print(GCRYMPI_FMT_HEX,_static_buffer_ptr,4096,0,mpi_ptr);
+
+    if(err) {
+        throw new GcryptError(err);
+    }
+    var mpi_str_ptr = _static_buffer_ptr;
+    var mpi_str = Module['Pointer_stringify'](mpi_str_ptr);
+
+    return Module["MPI_HOOK"]["BigInt"]["str2bigInt"](mpi_str,16);   
+}
+
+function __bigint2mpi(mpi_ptr,bi_num){
+    var new_mpi_ptr_ptr = _static_new_mpi_ptr_ptr;
+    var bi_num_str = Module["MPI_HOOK"]["BigInt"]["bigInt2str"](bi_num,16);
+    //gcry_error_t gcry_mpi_scan (gcry_mpi_t *r_mpi, enum gcry_mpi_format format, const unsigned char *buffer, size_t buflen, size_t *nscanned)
+    var err = gcry_.mpi_scan(new_mpi_ptr_ptr,4,bi_num_str,0,0);
+    if(err){
+        throw new GcryptError(err);
+    }
+    var scanned_mpi_ptr = getValue(new_mpi_ptr_ptr,"i32");
+    if(scanned_mpi_ptr==0){
+        console.log("NULL scanned mpi in bigint2mpi()");
+        process.exit();
+    }
+    //gcry_mpi_t gcry_mpi_set (gcry_mpi_t w, const gcry_mpi_t u)
+    var same = gcry_.mpi_set(mpi_ptr,scanned_mpi_ptr);
+
+    gcry_.mpi_release(scanned_mpi_ptr);
+    if(same && same != mpi_ptr){
+        return same;
+    }        
+}
+
 function GcryptError( num ) {
     this.num = num || 0;
     this.message = gcry_.strerror(num || 0);
 }
 GcryptError.prototype = new Error();
 GcryptError.prototype.constructor = GcryptError;
+
+
+var hexDigit = ['0','1','2','3','4','5','6','7','8','9','A','B','C','D','E','F'];
+
+function hexString( val ){
+    return hexDigit[(val & 0xF0) >> 4] + hexDigit[val & 0x0F];
+}
+
+function ptr_to_HexString(ptr,len){     
+    var hex = "";
+    for(var i=0; i<len; i++){
+        hex = hex + hexString( unsigned_char( getValue( ptr + i,"i8")));
+    }
+    return hex;
+}
+
+function ptr_to_ArrayBuffer(ptr,len){
+    var buf = new ArrayBuffer(len);
+    var u8 = new Uint8Array(buf);
+    for(var i=0; i<len; i++){
+        u8[i]= unsigned_char( getValue( ptr + i,"i8"));
+    }
+    return buf;    
+}
+
+function unsigned_char( c ){
+    c = c & 0xFF;
+    return ( c < 0 ? (0xFF+1)+c : c );
+}
+
+function unsigned_int32( i ){
+    //i must be in the range of a signed 32-bit integer!
+    i = i & 0xFFFFFFFF;//truncate so we dont return values larger than an unsigned 32-bit int.
+    return ( i < 0 ? (0xFFFFFFFF+1)+i : i );
+}
+
+// http://updates.html5rocks.com/2012/06/How-to-convert-ArrayBuffer-to-and-from-String
+function ab2str(buf) {
+  return String.fromCharCode.apply(null, new Uint16Array(buf));
+}
+
+function str2ab(str) {
+  var buf = new ArrayBuffer(str.length*2); // 2 bytes for each char
+  var bufView = new Uint16Array(buf);
+  for (var i=0, strLen=str.length; i<strLen; i++) {
+    bufView[i] = str.charCodeAt(i);
+  }
+  return buf;
+}

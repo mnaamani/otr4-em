@@ -127,6 +127,15 @@ otrchan_a.on("gone_secure",function(){
             otrchan_a.start_smp();
     }
 
+    //test the extra symmertric key
+   console.log("settings up symmetric key for file transfer (1): ", this.extraSymKey(1000,"ftp://website.net/files-A.tgz"));
+});
+
+otrchan_b.on("received_symkey",function(use,usedata,key){
+    console.log("Alice wants to do something with extra symkey");
+    console.log("    use:", use);
+    console.log("usedata:", ab2str(usedata));
+    console.log("    key:", key);
 });
 
 otrchan_b.on("smp_request",function(){
@@ -169,3 +178,6 @@ function dumpConnContext(chan,msg){
     console.log(msg,"\n",chan.context.obj());
 }
 
+function ab2str(buf) {  
+  return String.fromCharCode.apply(null, new Uint16Array(buf));
+}

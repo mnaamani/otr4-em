@@ -543,7 +543,6 @@ OtrlMessageAppOps* jsapi_messageappops_new(){
     ops->gone_secure = msgops_callback_gone_secure;
     ops->gone_insecure = msgops_callback_gone_insecure;
     ops->still_secure = msgops_callback_still_secure;
-    //ops->max_message_size = NULL;//disables fragmentation
     ops->max_message_size = msgops_callback_max_message_size;
     ops->account_name_free = msgops_callback_account_name_free;
     ops->account_name = msgops_callback_account_name;
@@ -559,7 +558,6 @@ OtrlMessageAppOps* jsapi_messageappops_new(){
     ops->handle_smp_event = msgops_callback_handle_smp_event;
     ops->handle_msg_event = msgops_callback_handle_msg_event;
     ops->create_instag = msgops_callback_create_instag;
-    //ops->create_instag = NULL;//non-persistent random instag per session
     //ops->convert_msg = msgops_callback_convert_msg;
     //ops->convert_free = msgops_callback_convert_free;
     //ops->timer_control = msgops_callback_timer_control;
