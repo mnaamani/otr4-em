@@ -14,6 +14,7 @@ var TEST_PASSED=false;
 var verbose =false;
 var FORCE_SMP = false;
 var SUCCESSFULL_SMP = false;
+var EXIT_TEST = false;
 
 if(typeof process !== "undefined" ){
  process.argv.forEach(function(arg){
@@ -88,9 +89,10 @@ otrchan_b.on("inject_message",function(msg){
 });
 
 //output incoming messages to console
-otrchan_a.on("message",function(msg){
-    if(this.isEncrypted()) {
+otrchan_a.on("message",function(msg,encrypted){
+    if(encrypted) {
         console.log('encrypted: Bob->Alice: ', msg);
+        if(msg == "EXIT_TEST") EXIT_TEST = true;
     }else{
         //policy is set to ALWAYS so we should not get any unencrypted messages!
         console.log('not-encrypted!!!: Bob->Alice: ',msg);
@@ -98,9 +100,10 @@ otrchan_a.on("message",function(msg){
 });
 
 //output incoming messages to console
-otrchan_b.on("message",function(msg){    
-    if(this.isEncrypted()) {
+otrchan_b.on("message",function(msg,encrypted){
+    if(encrypted) {
         console.log('encrypted: Alice->Bob: ', msg);
+        if(msg == "EXIT_TEST") EXIT_TEST = true;
     }else{
         //policy is set to ALWAYS so we should not get any unencrypted messages!
         console.log('not-encrypted!!!: Alice->Bob: ',msg);
@@ -121,14 +124,16 @@ otrchan_a.on("remote_disconnected",function(){
 });
 
 otrchan_a.on("gone_secure",function(){
-
-    if(!this.isAuthenticated() || FORCE_SMP ){
+        if(!this.isAuthenticated() || FORCE_SMP ){
             console.log("Alice initiating SMP authentication to verify keys...");
-            otrchan_a.start_smp();
-    }
-
-    //test the extra symmertric key
-   console.log("settings up symmetric key for file transfer (1): ", this.extraSymKey(1000,"ftp://website.net/files-A.tgz"));
+            this.start_smp();
+        }
+        setTimeout(function(self){
+            //console.log("sending hello bob3");
+            //self.send("Hello Bob! - 3");//too early bob will not realize private context is active..also a bug it seems to disturb SMP!
+        },25,this);
+        //test the extra symmertric key -- doesn't effect SMP in progress..
+        console.log("settings up symmetric key for file transfer (1): ", this.extraSymKey(1000,"ftp://website.net/files-A.tgz"));
 });
 
 otrchan_b.on("received_symkey",function(use,usedata,key){
@@ -136,19 +141,21 @@ otrchan_b.on("received_symkey",function(use,usedata,key){
     console.log("    use:", use);
     console.log("usedata:", ab2str(usedata));
     console.log("    key:", key);
+    this.send("EXIT_TEST");
 });
 
 otrchan_b.on("smp_request",function(){
         console.log("Bob responding to SMP request.");
-        otrchan_b.respond_smp('s3cr37');
+        this.respond_smp('s3cr37');
 });
 
 otrchan_a.on("smp_complete",function(){
-        otrchan_a.send("Hello Bob! - 2");
-        SUCCESSFULL_SMP = true;
+        console.log("########## smp_complete #########");
+            this.send("EXIT_TEST");
+            SUCCESSFULL_SMP = true;
 });
-//otrchan_a.connect();
-otrchan_a.send("Hello Bob! - 1");
+
+otrchan_a.send("IF POLICY IS ALWAYS THIS WILL NOT BE TRANSMITTED");
 //in libotr4 if policy is ALWAYS - initiall message doesn't seem to get resent or is the test
 //failing because of timing/race condition due to handling alice and bob in same thread..?
 
@@ -157,7 +164,7 @@ var loop = setInterval(function(){
     if(FORCE_SMP && !SUCCESSFULL_SMP){
         return;
     }
-    if(otrchan_a.isEncrypted() && otrchan_a.isAuthenticated() && otrchan_b.isEncrypted() && otrchan_b.isAuthenticated()){
+    if(otrchan_a.isEncrypted() && otrchan_a.isAuthenticated() && otrchan_b.isEncrypted() && otrchan_b.isAuthenticated() && EXIT_TEST){
         console.log("Finger print verification successful");
         dumpConnContext(otrchan_a,"Alice's ConnContext:");
         dumpConnContext(otrchan_b,"Bob's ConnContext:"); 
