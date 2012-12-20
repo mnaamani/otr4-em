@@ -10,11 +10,9 @@ console.log("== loaded libotr version:",otr.version());
 var debug = function(){};
 
 var USE_VFS = false;
-var TEST_PASSED=false;
 var verbose =false;
+
 var FORCE_SMP = false;
-var SUCCESSFULL_SMP = false;
-var EXIT_TEST = false;
 
 if(typeof process !== "undefined" ){
  process.argv.forEach(function(arg){
@@ -92,9 +90,8 @@ otrchan_b.on("inject_message",function(msg){
 otrchan_a.on("message",function(msg,encrypted){
     if(encrypted) {
         console.log('encrypted: Bob->Alice: ', msg);
-        if(msg == "EXIT_TEST") EXIT_TEST = true;
+        this.send(msg);
     }else{
-        //policy is set to ALWAYS so we should not get any unencrypted messages!
         console.log('not-encrypted!!!: Bob->Alice: ',msg);
     }
 });
@@ -103,11 +100,12 @@ otrchan_a.on("message",function(msg,encrypted){
 otrchan_b.on("message",function(msg,encrypted){
     if(encrypted) {
         console.log('encrypted: Alice->Bob: ', msg);
-        if(msg == "EXIT_TEST") EXIT_TEST = true;
     }else{
         //policy is set to ALWAYS so we should not get any unencrypted messages!
         console.log('not-encrypted!!!: Alice->Bob: ',msg);
     }
+    if(msg=="EXIT_TEST") exit_test(true);
+
 });
 
 
@@ -123,17 +121,16 @@ otrchan_a.on("remote_disconnected",function(){
     exit_test("");
 });
 
-otrchan_a.on("gone_secure",function(){
+otrchan_a.on("new_fingerprint",function(fingerprint){
+        console.log("new fingerprint:",fingerprint);
+});
+
+otrchan_a.on("gone_secure",function(fingerprint){
         if(!this.isAuthenticated() || FORCE_SMP ){
             console.log("Alice initiating SMP authentication to verify keys...");
             this.start_smp();
+            console.log("settings up symmetric key for file transfer (1): ", this.extraSymKey(1000,"ftp://website.net/files-A.tgz"));
         }
-        setTimeout(function(self){
-            //console.log("sending hello bob3");
-            //self.send("Hello Bob! - 3");//too early bob will not realize private context is active..also a bug it seems to disturb SMP!
-        },25,this);
-        //test the extra symmertric key -- doesn't effect SMP in progress..
-        console.log("settings up symmetric key for file transfer (1): ", this.extraSymKey(1000,"ftp://website.net/files-A.tgz"));
 });
 
 otrchan_b.on("received_symkey",function(use,usedata,key){
@@ -150,32 +147,13 @@ otrchan_b.on("smp_request",function(){
 });
 
 otrchan_a.on("smp_complete",function(){
-        console.log("########## smp_complete #########");
-            this.send("EXIT_TEST");
-            SUCCESSFULL_SMP = true;
+    console.log("SMP COMPLETE");
 });
 
 otrchan_a.send("IF POLICY IS ALWAYS THIS WILL NOT BE TRANSMITTED");
 //in libotr4 if policy is ALWAYS - initiall message doesn't seem to get resent or is the test
-//failing because of timing/race condition due to handling alice and bob in same thread..?
 
-var loop = setInterval(function(){
-    console.log("_");
-    if(FORCE_SMP && !SUCCESSFULL_SMP){
-        return;
-    }
-    if(otrchan_a.isEncrypted() && otrchan_a.isAuthenticated() && otrchan_b.isEncrypted() && otrchan_b.isAuthenticated() && EXIT_TEST){
-        console.log("Finger print verification successful");
-        dumpConnContext(otrchan_a,"Alice's ConnContext:");
-        dumpConnContext(otrchan_b,"Bob's ConnContext:"); 
-        TEST_PASSED=true;        
-        if(loop) clearInterval(loop);        
-        otrchan_b.close();
-    }
-},500);
-
-function exit_test(msg){
-    console.log(msg);
+function exit_test(TEST_PASSED){
     if(TEST_PASSED){ console.log("== TEST PASSED ==\n"); } else { console.log("== TEST FAILED ==\n"); }
     if(VFS) VFS.save();
     process.exit();

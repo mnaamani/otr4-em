@@ -233,11 +233,10 @@ True only if the fingerprint of the buddy has been authenticated/verified by SMP
 * inject_message(msg_fragment) - encrypted msg_fragment to be sent to buddy
 
 * gone_secure() - message exchange is now encrypted.
-* gone_insecure() - message exchange is now in plain text.
 * still_secure() - encryption re-negotiated. message exchange is encrypted.
 
-* create_privkey() - a private key for account/protocol specified was not found and needs to be created.
-* create_instag() - an instance tag for account/protocol specified was not found and needs to be created.
+* create_privkey(accountname,protocol) - a private key for account/protocol specified was not found and needs to be created.
+* create_instag(accountname,protocol) - an instance tag for account/protocol specified was not found and needs to be created.
 * new_fingerprint(fingerprint) - first time we are seeing remote buddy's fingerprint. This is a que to begin authentication.
 
 * smp_request(question) - buddy has started a SMP authentication. (possibly with a question)
@@ -254,13 +253,13 @@ True only if the fingerprint of the buddy has been authenticated/verified by SMP
 buddy has sent additional use information and use-specific data in **use_num** (number) and **usedata_buff** (ArrayBuffer).
 **key_buff** is the 32-byte ArrayBuffer holding the synchronised symmetric key.
 
-## otr.MSGEVENT(event_number)
+## otr.MSGEVENT(event_number)   
 Returns on of the corresponding event names below of event_number
 
     NONE
     ENCRYPTION_REQUIRED
     ENCRYPTION_ERROR
-    CONNECTION_ENDED   //internally 'remote_disconnected' event is fired instead of msg_event
+    CONNECTION_ENDED
     SETUP_ERROR
     MSG_REFLECTED
     MSG_RESENT
@@ -270,7 +269,7 @@ Returns on of the corresponding event names below of event_number
     LOG_HEARTBEAT_RCVD
     LOG_HEARTBEAT_SENT
     RCVDMSG_GENERAL_ERR
-    RCVDMSG_UNENCRYPTED  //internally 'message' event is fired instead of msg_event
+    RCVDMSG_UNENCRYPTED  //'message' event will also be fired with encrypted parameter = false
     RCVDMSG_UNRECOGNIZED
     RCVDMSG_FOR_OTHER_INSTANCE
 

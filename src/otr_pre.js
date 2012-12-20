@@ -274,6 +274,10 @@ Module['preRun'].push(function(){
 
 });//preRun
 
+
+// __msgops_callback_ functions are called from jsapi.c to bubble up to 
+// to eventually fire the corresponding event emitted by otr.Session()
+
 function __msgops_callback_smp_request($opdata,$context,$question){
     var obj = (new Module["ConnContext"]($context))["obj"]();
     if($question!=0) obj["question"] = Module["Pointer_stringify"]($question);
@@ -297,7 +301,10 @@ function __msgops_callback_policy($opdata, $context) {
 }
 
 function __msgops_callback_create_privkey($opdata,$accountname,$protocol){
-  Module["ops_event"]($opdata,{},"create_privkey");
+  Module["ops_event"]($opdata,{
+    "accountname":Module["Pointer_stringify"]($accountname),
+    "protocol":Module["Pointer_stringify"]($protocol)
+  },"create_privkey");
 }
 
 function __msgops_callback_is_logged_in($opdata,$accountname,$protocol,$recipient){
