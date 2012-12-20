@@ -175,7 +175,7 @@ function print_message(name,msg,encrypted){
 //alice received message from bob
 session_a.on("message",function(msg,encrypted){
     print_message('<<',msg,encrypted);
-    session_a.close();
+    session_b.close();
 });
 //bob received message from alice
 session_b.on("message",function(msg,encrypted){
@@ -183,13 +183,10 @@ session_b.on("message",function(msg,encrypted){
     this.send("got your message '"+msg+"'");
 });
 
-//will get fired because we .close()'ed session_a
-session_a.on("shutdown",function(){
-    console.log("[Alice] Closed the Session.");
+session_a.on("remote_disconnected",function(){
+    console.log("Session was closed remotely");
     exit_test("",true);
-});
-session_b.on("remote_disconnected",function(){
-    console.log("[Bob] Session was closed remotely");
+
 });
 
 session_b.on("received_symkey",function(use,usedata,key){

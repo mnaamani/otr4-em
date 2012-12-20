@@ -83,6 +83,8 @@ Module['preRun'].push(function(){
     Module["libotrl"]["instag_write"]=otrl_.instag_write=cwrap('otrl_instag_write','number',['number','string']);
     Module["libotrl"]["instag_find"]=otrl_.instag_find=cwrap('otrl_instag_find','number',['number','string','string']);
     Module["libotrl"]["message_symkey"]=otrl_.message_symkey = cwrap('otrl_message_symkey','number',['number','number','number','number','number','number','number','number']);
+    Module["libotrl"]["tlv_free"]=otrl_.tlv_free = cwrap('otrl_tlv_free','',['number']);
+    Module["libotrl"]["tlv_find"]=otrl_.tlv_find = cwrap('otrl_tlv_find','number',['number','number']);
 
     Module["jsapi"]={};    
     Module["jsapi"]["can_start_smp"]=jsapi_.can_start_smp = cwrap('jsapi_can_start_smp','number',['number']);

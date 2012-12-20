@@ -104,7 +104,7 @@ otrchan_b.on("message",function(msg,encrypted){
         //policy is set to ALWAYS so we should not get any unencrypted messages!
         console.log('not-encrypted!!!: Alice->Bob: ',msg);
     }
-    if(msg=="EXIT_TEST") exit_test(true);
+    if(msg=="EXIT_TEST") otrchan_b.close();
 
 });
 
@@ -112,13 +112,12 @@ otrchan_b.on("message",function(msg,encrypted){
 //will get fired because we are manually closing otrchan_b
 otrchan_b.on("shutdown",function(){
     console.log("Bob's channel shutting down.");
-    exit_test("");
 });
 
 //because otrchan_b was closed otrchan_a get a remote_disconnect event.
 otrchan_a.on("remote_disconnected",function(){
     console.log("Bob disconnected");
-    exit_test("");
+    exit_test(true);
 });
 
 otrchan_a.on("new_fingerprint",function(fingerprint){
@@ -129,6 +128,8 @@ otrchan_a.on("gone_secure",function(fingerprint){
         if(!this.isAuthenticated() || FORCE_SMP ){
             console.log("Alice initiating SMP authentication to verify keys...");
             this.start_smp();
+            console.log("settings up symmetric key for file transfer (1): ", this.extraSymKey(1000,"ftp://website.net/files-A.tgz"));
+        }else{
             console.log("settings up symmetric key for file transfer (1): ", this.extraSymKey(1000,"ftp://website.net/files-A.tgz"));
         }
 });
@@ -154,6 +155,7 @@ otrchan_a.send("IF POLICY IS ALWAYS THIS WILL NOT BE TRANSMITTED");
 //in libotr4 if policy is ALWAYS - initiall message doesn't seem to get resent or is the test
 
 function exit_test(TEST_PASSED){
+    otrchan_b.close();
     if(TEST_PASSED){ console.log("== TEST PASSED ==\n"); } else { console.log("== TEST FAILED ==\n"); }
     if(VFS) VFS.save();
     process.exit();
