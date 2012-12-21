@@ -18,11 +18,11 @@ alice.readKeysSync("alice.keys");
 
 console.log( alice.fingerprint("alice@telechat.org","telechat"));
 
-console.log(alice.accounts());
-
 console.log("generating instance tag...");
 alice.generateInstag("alice.instags","alice@telechat.org","telechat");
 console.log("new tag=", alice.findInstag("alice@telechat.org","telechat"));
+
+console.log(alice.accounts());
 
 console.log("creating a context");
 var ctx = new otr.ConnContext(alice,"alice@telechat.org","telechat","bob");
