@@ -42,7 +42,7 @@ Module['preRun'].push(function(){
     Module['FS_createDevice']("/dev/","urandom",(function(){
       return Math.floor(Math.random() * 256);
     }));
-    console.error("created /dev/random and /dev/urandom devices.");
+    console.error("created virtual /dev/random devices.");
     
     _static_buffer_ptr = allocate(4096,"i8",ALLOC_STATIC); 
     _static_new_mpi_ptr_ptr = allocate(4,"i8",ALLOC_STATIC);
@@ -175,7 +175,7 @@ Module['preRun'].push(function(){
             return 0;
         };
 */
-      console.log("overriding __gcry_mpi_mod");
+      //console.log("overriding __gcry_mpi_mod");
 /*perf boost not tested but it should be enhancing..*/
         __gcry_mpi_mod = function BigInt_MPI_MOD(mpi_r,mpi_x,mpi_n){
             //console.log(">__gcry_mpi_mod()");
@@ -185,7 +185,7 @@ Module['preRun'].push(function(){
             __bigint2mpi(mpi_r, Module["MPI_HOOK"]["BigInt"]["mod"](x,n));
         };
         
-        console.log("overriding __gcry_mpi_powm");
+        //console.log("overriding __gcry_mpi_powm");
 
 //confirmed bigint mulpowm, powm and invm, gcd  enhance performance..
         __gcry_mpi_powm = function BigInt_MPI_POWMOD(w, b, e, m){
@@ -197,7 +197,7 @@ Module['preRun'].push(function(){
           __bigint2mpi(w,result);
         };
 
-      console.log("overriding __gcry_mpi_invm");
+      //console.log("overriding __gcry_mpi_invm");
 
         //return (x**(-1) mod n) for bigInts x and n.  If no inverse exists, it returns null
         __gcry_mpi_invm = function BigInt_MPI_INVERSEMOD(x,a,m){
@@ -224,7 +224,7 @@ Module['preRun'].push(function(){
           __bigint2mpi(w,result);
         };
 */
-      console.log("overriding __gcry_mpi_mulpowm");
+      //console.log("overriding __gcry_mpi_mulpowm");
         __gcry_mpi_mulpowm = function BigInt_MPI_MULPOWM(mpi_r,mpi_array_base,mpi_array_exp,mpi_m){
             //console.log(">__gcry_mpi_mulpowm()");
             var indexer = 1;
@@ -257,7 +257,7 @@ Module['preRun'].push(function(){
 //      _gcry_generate_elg_prime
 
 
-      console.log("overriding _gen_prime");
+      //console.log("overriding _gen_prime");
 
 /*static gcry_mpi_t gen_prime (unsigned int nbits, int secret, int randomlevel,
                              int (*extra_check)(void *, gcry_mpi_t),
@@ -425,8 +425,7 @@ function __bigint2mpi(mpi_ptr,bi_num){
     }
     var scanned_mpi_ptr = getValue(new_mpi_ptr_ptr,"i32");
     if(scanned_mpi_ptr==0){
-        console.log("NULL scanned mpi in bigint2mpi()");
-        process.exit();
+        throw("NULL scanned MPI in __bigint2mpi() otr_pre.js");
     }
     //gcry_mpi_t gcry_mpi_set (gcry_mpi_t w, const gcry_mpi_t u)
     var same = gcry_.mpi_set(mpi_ptr,scanned_mpi_ptr);

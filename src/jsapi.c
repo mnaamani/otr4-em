@@ -1,7 +1,6 @@
 #include "jsapi.h"
 
 void jsapi_initialise(){
-    printf("Initialising libotr...\n");
     /* Version check should be the very first call because it
           makes sure that important subsystems are intialized. */
 	if (!gcry_check_version (GCRYPT_VERSION))
