@@ -13,6 +13,8 @@ OtrlPrivKey* jsapi_userstate_get_privkey_root(OtrlUserState us);
 OtrlPrivKey* jsapi_privkey_get_next(OtrlPrivKey* p);
 char* jsapi_privkey_get_accountname(OtrlPrivKey* p);
 char* jsapi_privkey_get_protocol(OtrlPrivKey* p);
+gcry_error_t jsapi_privkey_write_trusted_fingerprints(OtrlUserState us,const char *filename);
+gcry_error_t jsapi_privkey_write_trusted_fingerprints_FILEp(OtrlUserState us, FILE *storef);
 gcry_error_t jsapi_privkey_delete(OtrlUserState us, const char *filename, const char *accountname, const char *protocol);
 gcry_error_t jsapi_privkey_get_dsa_token(OtrlPrivKey *keyToExport, const char* token, unsigned char *buffer, size_t buflen, size_t *nbytes);
 gcry_error_t jsapi_userstate_import_privkey(OtrlUserState us, char *accountname, char * protocol, gcry_mpi_t p, gcry_mpi_t q, gcry_mpi_t g, gcry_mpi_t y, gcry_mpi_t x);
