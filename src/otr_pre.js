@@ -19,6 +19,7 @@ function _i32______gpg_err_init_to_void_____(){};//workaround.. TODO:investigate
 
 var _static_buffer_ptr;
 var _static_new_mpi_ptr_ptr;
+var _static_otr_error_message_str;
 var gcry_ = {};
 var jsapi_ = {};
 var otrl_ = {};
