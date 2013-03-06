@@ -10,7 +10,7 @@ console.log("== loaded libotr version:",otr.version());
 var debug = function(){};
 
 var USE_VFS = false;
-var verbose =false;
+var verbose =true;
 var FORCE_SMP = false;
 var SEND_BAD_SECRET = false;
 var INIT_KEYS = true;
@@ -39,7 +39,7 @@ if(typeof process !== "undefined" ){
 
 if(verbose){
     otr.debugOn();
-    debug = console.error;
+    debug = function(a,b,c,d,e){console.log(a,b,c,d,e);};
 }
 
 if(USE_VFS){
@@ -101,7 +101,10 @@ function make_key_for_user(user,accountname,protocol){
 
     console.log("creating a new key for:",user.name,accountname,protocol);
     user.generateKey(accountname,protocol,function(err,key){
-        if(!err) debug("Key Generated Successfully");
+        if(err){
+            console.log(err);
+            process.exit();
+        }else debug("Key Generated Successfully");
     });
 
     //if(this.connect) this.connect();//resend a query when after key is generated
