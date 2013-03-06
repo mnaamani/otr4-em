@@ -118,7 +118,7 @@ gcry_error_t jsapi_account_write(FILE *privf, const char *accountname,
 }
 
 gcry_error_t jsapi_userstate_write_to_file(OtrlUserState us, const char *filename){
-    gcry_error_t err;
+    gcry_error_t err = GPG_ERR_NO_ERROR;
     FILE *privf;
     OtrlPrivKey *p;
     mode_t oldmask;
@@ -149,7 +149,7 @@ gcry_error_t jsapi_userstate_write_to_file(OtrlUserState us, const char *filenam
 gcry_error_t jsapi_privkey_delete(OtrlUserState us, const char *filename,
 	const char *accountname, const char *protocol)
 {
-    gcry_error_t err = 0;
+    gcry_error_t err = GPG_ERR_NO_ERROR;
     
     /* remove key from userstate */
     OtrlPrivKey* existing_key = otrl_privkey_find(us,accountname,protocol);
