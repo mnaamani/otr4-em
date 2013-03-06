@@ -24,7 +24,7 @@ if(typeof process !== "undefined" ){
 
 if(verbose){
     otr.debugOn();
-    debug = console.error;
+    debug = function(){console.log([].join.call(arguments," "));};
 }
 
 if(USE_VFS){

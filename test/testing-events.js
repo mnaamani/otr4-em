@@ -39,7 +39,7 @@ if(typeof process !== "undefined" ){
 
 if(verbose){
     otr.debugOn();
-    debug = function(a,b,c,d,e){console.log(a,b,c,d,e);};
+    debug = function(){console.log([].join.call(arguments," "));};
 }
 
 if(USE_VFS){
