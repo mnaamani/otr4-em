@@ -22,6 +22,9 @@ EXPORTED_FUNCS= -s EXPORTED_FUNCTIONS="['_gcry_strerror','_malloc','_free','__gc
 #closure compiler makes exported VFS unusable..
 OPTIMISATION= -O2 --closure 0 --llvm-opts 1 --minify 0 -s LINKABLE=1 $(EXPORTED_FUNCS)
 
+#for google chrome dev, use max O1, dont use llvm-opts
+#OPTIMISATION= -O1 --closure 1 --llvm-opts 0 --minify 0 -s LINKABLE=1 $(EXPORTED_FUNCS)
+
 module-optimised:
 	mkdir -p lib/
 	$(EMCC) src/jsapi.c -I$(CRYPTO_BUILD)/include -lotr -L$(CRYPTO_BUILD)/lib \
