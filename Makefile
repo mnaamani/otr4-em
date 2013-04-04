@@ -23,7 +23,7 @@ EXPORTED_FUNCS= -s EXPORTED_FUNCTIONS="['_gcry_strerror','_malloc','_free','__gc
 OPTIMISATION= -O2 --closure 0 --llvm-opts 1 --minify 0 -s LINKABLE=1 $(EXPORTED_FUNCS)
 
 #for google chrome dev, use max O1, dont use llvm-opts
-#OPTIMISATION= -O1 --closure 1 --llvm-opts 0 --minify 0 -s LINKABLE=1 $(EXPORTED_FUNCS)
+OPTIMISATION_CHROME= -O1 --closure 1 --llvm-opts 0 --minify 0 -s LINKABLE=1 $(EXPORTED_FUNCS)
 
 module-optimised:
 	mkdir -p lib/
@@ -33,4 +33,14 @@ module-optimised:
         -s TOTAL_MEMORY=1048576  -s TOTAL_STACK=409600 \
         $(OPTIMISATION)
 	cat src/header.js lib/_libotr4.js src/footer.js > lib/libotr4.js
+	rm lib/_libotr4.js
+
+chrome:
+	mkdir -p lib/
+	$(EMCC) src/jsapi.c -I$(CRYPTO_BUILD)/include -lotr -L$(CRYPTO_BUILD)/lib \
+        -o lib/_libotr4.js \
+        --pre-js src/otr_pre.js \
+        -s TOTAL_MEMORY=1048576  -s TOTAL_STACK=409600 \
+        $(OPTIMISATION_CHROME)
+	cat src/header.js lib/_libotr4.js src/footer.js > lib/libotr4-chrome.js
 	rm lib/_libotr4.js
