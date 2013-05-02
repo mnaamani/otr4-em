@@ -35,15 +35,14 @@ Module['preRun'].push(function(){
     _select = (function() {
       return 3;//this means all the three socket sets passed to the function are have sockets ready for reading.
     });
-    
-    Module['FS_createDevice']("/dev/","random",(function(){
+    var devFolder = Module['FS'].findObject("/dev") || Module['FS_createFolder']("/","dev",true,true);
+    Module['FS_createDevice'](devFolder,"random",(function(){
       return Math.floor(Math.random() * 256);
     }));
 
-    Module['FS_createDevice']("/dev/","urandom",(function(){
+    Module['FS_createDevice'](devFolder,"urandom",(function(){
       return Math.floor(Math.random() * 256);
     }));
-    console.error("created virtual /dev/random devices.");
     
     _static_buffer_ptr = allocate(4096,"i8",ALLOC_STATIC); 
     _static_new_mpi_ptr_ptr = allocate(4,"i8",ALLOC_STATIC);
