@@ -12,7 +12,7 @@ It is however NOT a recommended practice to download a precompiled crypto librar
 
 See [How-to build libotr4.js](https://github.com/mnaamani/otr4-em/blob/master/BUILDING)
 
-[API](https://github.com/mnaamani/otr4-em/blob/master/doc/API.md)
+[API Documentation](https://github.com/mnaamani/otr4-em/blob/master/doc/API.md)
 
 ### License
 GPLv2
