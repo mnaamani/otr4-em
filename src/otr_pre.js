@@ -276,119 +276,118 @@ Module['preRun'].push(function(){
         }
     };
 
-});//preRun
-
-
 // __msgops_callback_ functions are called from jsapi.c to bubble up to 
 // to eventually fire the corresponding event emitted by otr.Session()
 
-function __msgops_callback_smp_request($opdata,$context,$question){
-    var obj = (new Module["ConnContext"]($context))["obj"]();
-    if($question!=0) obj["question"] = Module["Pointer_stringify"]($question);
-    Module["ops_event"]($opdata, obj, "smp_request");
-}
-function __msgops_callback_smp_failed($opdata,$context){
-    Module["ops_event"]($opdata, (new Module["ConnContext"]($context))["obj"](),"smp_failed");
-}
-function __msgops_callback_smp_aborted($opdata,$context){
-    Module["ops_event"]($opdata, (new Module["ConnContext"]($context))["obj"](),"smp_aborted");
-}
-function __msgops_callback_smp_complete($opdata,$context){
-    Module["ops_event"]($opdata, (new Module["ConnContext"]($context))["obj"](),"smp_complete");
-}
-function __msgops_callback_smp_error($opdata,$context){
-    Module["ops_event"]($opdata, (new Module["ConnContext"]($context))["obj"](),"smp_error");    
-}
+    __msgops_callback_policy = function($opdata, $context) {
+        return Module["ops_event"]($opdata,{},"policy");
+    };
 
-function __msgops_callback_policy($opdata, $context) {
-  return Module["ops_event"]($opdata,{},"policy");
-}
+    __msgops_callback_smp_request = function($opdata,$context,$question){
+        var obj = (new Module["ConnContext"]($context))["obj"]();
+        if($question!=0) obj["question"] = Module["Pointer_stringify"]($question);
+        Module["ops_event"]($opdata, obj, "smp_request");
+    };
+    
+    __msgops_callback_smp_failed = function($opdata,$context){
+        Module["ops_event"]($opdata, (new Module["ConnContext"]($context))["obj"](),"smp_failed");
+    };
+    
+    __msgops_callback_smp_aborted = function($opdata,$context){
+        Module["ops_event"]($opdata, (new Module["ConnContext"]($context))["obj"](),"smp_aborted");
+    };
+    
+    __msgops_callback_smp_complete = function($opdata,$context){
+        Module["ops_event"]($opdata, (new Module["ConnContext"]($context))["obj"](),"smp_complete");
+    };
+    
+    __msgops_callback_smp_error = function($opdata,$context){
+        Module["ops_event"]($opdata, (new Module["ConnContext"]($context))["obj"](),"smp_error");    
+    };
 
-function __msgops_callback_create_privkey($opdata,$accountname,$protocol){
-  Module["ops_event"]($opdata,{
-    "accountname":Module["Pointer_stringify"]($accountname),
-    "protocol":Module["Pointer_stringify"]($protocol)
-  },"create_privkey");
-}
+    __msgops_callback_create_privkey = function($opdata,$accountname,$protocol){
+        Module["ops_event"]($opdata,{
+          "accountname":Module["Pointer_stringify"]($accountname),
+            "protocol":Module["Pointer_stringify"]($protocol)
+          },"create_privkey");
+    };
 
-function __msgops_callback_is_logged_in($opdata,$accountname,$protocol,$recipient){
-  return Module["ops_event"]($opdata,{},"is_logged_in");
-}
+    __msgops_callback_is_logged_in = function($opdata,$accountname,$protocol,$recipient){
+        return Module["ops_event"]($opdata,{},"is_logged_in");
+    };
 
-function __msgops_callback_inject_message($opdata,$accountname,$protocol,$recipient,$message){
-    Module["ops_event"]($opdata,{
-        "message":Module["Pointer_stringify"]($message)
-    },"inject_message");
-}
+    __msgops_callback_inject_message = function($opdata,$accountname,$protocol,$recipient,$message){
+        Module["ops_event"]($opdata,{
+            "message":Module["Pointer_stringify"]($message)
+        },"inject_message");;
+    };
 
-function __msgops_callback_update_context_list($opdata){
-    Module["ops_event"]($opdata,{},"update_context_list");
-}
+    __msgops_callback_update_context_list = function($opdata){
+        Module["ops_event"]($opdata,{},"update_context_list");
+    };
 
-function __msgops_callback_new_fingerprint($opdata,$userstate,$accountname,$protocol,$username,$fingerprint_human){
-    Module["ops_event"]($opdata,{
-        "fingerprint":Module["Pointer_stringify"]($fingerprint_human)
-    },"new_fingerprint")    
-}
-function __msgops_callback_write_fingerprints($opdata){
-    Module["ops_event"]($opdata,{},"write_fingerprints");
-}
-function __msgops_callback_gone_secure($opdata,$context){
-    Module["ops_event"]($opdata,{},"gone_secure");
-}
-function __msgops_callback_gone_insecure($opdata,$context){
-    Module["ops_event"]($opdata,{},"gone_insecure");
-}
-function __msgops_callback_still_secure($opdata,$context,$is_reply){
-    Module["ops_event"]($opdata,{},"still_secure");
-}
-function __msgops_callback_max_message_size($opdata,$context){
-    return Module["ops_event"]($opdata,{},"max_message_size");
-}
+    __msgops_callback_new_fingerprint = function($opdata,$userstate,$accountname,$protocol,$username,$fingerprint_human){
+        Module["ops_event"]($opdata,{
+            "fingerprint":Module["Pointer_stringify"]($fingerprint_human)
+        },"new_fingerprint")    
+    };
+    
+    __msgops_callback_write_fingerprints = function($opdata){
+        Module["ops_event"]($opdata,{},"write_fingerprints");
+    };
+    
+    __msgops_callback_gone_secure = function($opdata,$context){
+        Module["ops_event"]($opdata,{},"gone_secure");
+    };
+    
+    __msgops_callback_gone_insecure = function($opdata,$context){
+        Module["ops_event"]($opdata,{},"gone_insecure");
+    };
+    
+    __msgops_callback_still_secure = function($opdata,$context,$is_reply){
+        Module["ops_event"]($opdata,{},"still_secure");
+    };
+    
+    __msgops_callback_max_message_size = function($opdata,$context){
+        return Module["ops_event"]($opdata,{},"max_message_size");
+    };
 
-//new ops in libotr4
-function __msgops_callback_received_symkey($opdata,$context,$use,$usedata,$usedatalen,$symkey){
-    Module["ops_event"]($opdata,{
-        "use": $use,
-        "usedata":ptr_to_Buffer($usedata,$usedatalen),
-        "key":ptr_to_Buffer($symkey,32)
-    },"received_symkey")
+    //new ops in libotr4
+    __msgops_callback_received_symkey = function($opdata,$context,$use,$usedata,$usedatalen,$symkey){
+        Module["ops_event"]($opdata,{
+            "use": $use,
+            "usedata":ptr_to_Buffer($usedata,$usedatalen),
+            "key":ptr_to_Buffer($symkey,32)
+        },"received_symkey");
+    };
 
-/* for debugging..
-    Module["ops_event"]($opdata,{
-        "use": $use,
-        "usedata":ab2str(ptr_to_ArrayBuffer($usedata,$usedatalen)),
-        "key":ptr_to_HexString($symkey,32)
-    },"received_symkey")
-*/
-}
+    /*const char * msgops_callback_otr_error_message(void *opdata, ConnContext *context, OtrlErrorCode err_code){}*/
+    __msgops_callback_otr_error_message = function($opdata, $context, $err_code){
+        //TODO:write error string into _static_otr_error_message_str
+        //for now this is implemented in jsapi.c
+        return _static_otr_error_message_str;
+    }
 
-/*const char * msgops_callback_otr_error_message(void *opdata, ConnContext *context, OtrlErrorCode err_code){}*/
-function __msgops_callback_otr_error_message($opdata, $context, $err_code){
-    //TODO:write error string into _static_otr_error_message_str
-    //for now this is implemented in jsapi.c
-    return _static_otr_error_message_str;
-}
+    /*void msgops_callback_otr_error_message_free(void *opdata, const char *err_msg){}*/
+    __msgops_callback_otr_error_message_free = function($opdata, $err_msg){
+        //no need to free anything.. we are using a statically allocated shared memory location.
+    };
 
-/*void msgops_callback_otr_error_message_free(void *opdata, const char *err_msg){}*/
-function __msgops_callback_otr_error_message_free($opdata, $err_msg){
-    //no need to free anything.. we are using a statically allocated shared memory location.
-}
+    __msgops_callback_handle_msg_event = function($opdata, $msg_event,$context, $message, $err){
+        Module["ops_event"]($opdata,{
+            "event":$msg_event,
+            "message":Module["Pointer_stringify"]($message),
+            "err": ($err? new GcryptError($err):null)
+        },"msg_event");
+    };
 
-function __msgops_callback_handle_msg_event($opdata, $msg_event,$context, $message, $err){
-    Module["ops_event"]($opdata,{
-        "event":$msg_event,
-        "message":Module["Pointer_stringify"]($message),
-        "err": ($err? new GcryptError($err):null)
-    },"msg_event");
-}
-
-function __msgops_callback_create_instag($opdata, $accountname, $protocol){
-    Module["ops_event"]($opdata,{
-        "accountname":Module["Pointer_stringify"]($accountname),
-        "protocol":Module["Pointer_stringify"]($protocol)
-    },"create_instag");
-}
+    __msgops_callback_create_instag = function($opdata, $accountname, $protocol){
+        Module["ops_event"]($opdata,{
+            "accountname":Module["Pointer_stringify"]($accountname),
+            "protocol":Module["Pointer_stringify"]($protocol)
+        },"create_instag");
+    };
+    
 /* TODO
 void msgops_callback_convert_msg(void *opdata, ConnContext *context,
         OtrlConvertType convert_type, char ** dest, const char *src){
@@ -401,6 +400,10 @@ void msgops_callback_timer_control(void *opdata, unsigned int interval){
     _msgops_callback_timer_control(opdata,interval);
 }
 */
+
+});//preRun
+
+
 
 //todo:copy directly between memory and bigint array.. (faster than string conversions?..)
 function __mpi2bigint(mpi_ptr){
