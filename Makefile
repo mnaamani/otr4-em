@@ -20,10 +20,10 @@ EXPORTED_FUNCS= -s EXPORTED_FUNCTIONS="['_gcry_strerror','_malloc','_free','__gc
             '_otrl_tlv_find', '_otrl_tlv_free' ]"
 
 #closure compiler makes exported VFS unusable..
-OPTIMISATION= -O2 --closure 0 --llvm-opts 1 --minify 0 -s LINKABLE=1 $(EXPORTED_FUNCS)
+OPTIMISATION= -O2 --closure 0 --llvm-opts 1 --minify 0 -s LINKABLE=1 $(EXPORTED_FUNCS) -s ASM_JS=0
 
 #for google chrome dev, use max O1, dont use llvm-opts
-OPTIMISATION_CHROME= -O1 --closure 1 --llvm-opts 0 --minify 0 -s LINKABLE=1 $(EXPORTED_FUNCS)
+OPTIMISATION_CHROME= -O1 --closure 1 --llvm-opts 0 --minify 0 -s LINKABLE=1 $(EXPORTED_FUNCS) -s ASM_JS=0
 
 module-optimised:
 	mkdir -p lib/
