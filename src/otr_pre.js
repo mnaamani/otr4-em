@@ -115,7 +115,8 @@ Module['preRun'].push(function(){
     Module["helper"]={};
     Module["helper"]["mpi2bigint"] = helper_.mpi2bigint = __mpi2bigint;
     Module["helper"]["bigint2mpi"] = helper_.bigint2mpi = __bigint2mpi;
-    Module["helper"]["ptr_to_ArrayBuffer"] = helper_.ptr_to_ArrayBuffer = ptr_to_ArrayBuffer;
+    Module["helper"]["ptr_to_ArrayBuffer"] = helper_.ptr_to_ArrayBuffer = ptr_to_Buffer;
+    Module["helper"]["ptr_to_Buffer"] = helper_.ptr_to_Buffer = ptr_to_Buffer;
     Module["helper"]["ptr_to_HexString"] = helper_.ptr_to_HexString = ptr_to_HexString;
     Module["helper"]["unsigned_char"] = helper_.unsigned_char = unsigned_char;
     Module["helper"]["unsigned_int32"] = helper_.unsigned_int32 = unsigned_int32;
@@ -349,8 +350,8 @@ function __msgops_callback_max_message_size($opdata,$context){
 function __msgops_callback_received_symkey($opdata,$context,$use,$usedata,$usedatalen,$symkey){
     Module["ops_event"]($opdata,{
         "use": $use,
-        "usedata":ptr_to_ArrayBuffer($usedata,$usedatalen),
-        "key":ptr_to_ArrayBuffer($symkey,32)
+        "usedata":ptr_to_Buffer($usedata,$usedatalen),
+        "key":ptr_to_Buffer($symkey,32)
     },"received_symkey")
 
 /* for debugging..
@@ -459,13 +460,12 @@ function ptr_to_HexString(ptr,len){
     return hex;
 }
 
-function ptr_to_ArrayBuffer(ptr,len){
-    var buf = new ArrayBuffer(len);
-    var u8 = new Uint8Array(buf);
+function ptr_to_Buffer(ptr,len){
+    var buf = new Buffer(len);
     for(var i=0; i<len; i++){
-        u8[i]= unsigned_char( getValue( ptr + i,"i8"));
+        buf.writeInt8(getValue(ptr+i,"i8"),i);
     }
-    return buf;    
+    return buf;
 }
 
 function unsigned_char( c ){
