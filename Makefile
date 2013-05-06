@@ -25,7 +25,7 @@ OPTIMISATION= -O2 --closure 0 --llvm-opts 1 --minify 0 -s LINKABLE=1 $(EXPORTED_
 #for google chrome dev, use max O1, dont use llvm-opts
 OPTIMISATION_CHROME= -O1 --closure 1 --llvm-opts 0 --minify 0 -s LINKABLE=1 $(EXPORTED_FUNCS) -s ASM_JS=0
 
-module-optimised:
+node:
 	mkdir -p lib/
 	$(EMCC) src/jsapi.c -I$(CRYPTO_BUILD)/include -lotr -L$(CRYPTO_BUILD)/lib \
         -o lib/_libotr4.js \
