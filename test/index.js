@@ -197,11 +197,13 @@ session_b.on("received_symkey",function(use,usedata,key){
     SYMKEY_TEST_DONE = true;
     console.log("Received Symmetric Key");
     debug("    use:", use);
-    debug("usedata:", usedata);
-    console.log("    key:", key);
-    SYMKEY_TEST_PASSED= ((SYMKEY_TEST_VALUES.use === use) &&
-         (SYMKEY_TEST_VALUES.usedata === usedata.toString()) &&
-         (SYMKEY_TEST_VALUES.key.toString() === key.toString()) )
+    debug("usedata:", ab2str(usedata));
+    debug("    key:", ab2str(key));
+    SYMKEY_TEST_PASSED= (
+        (SYMKEY_TEST_VALUES.use === use) &&
+        (SYMKEY_TEST_VALUES.usedata === ab2str(usedata)) &&
+        (SYMKEY_TEST_VALUES.key === ab2str(key))
+    );
 });
 
 function end_smp_test(){
@@ -265,7 +267,7 @@ var loop = setInterval(function(){
         SYMKEY_TEST_IN_PROGRESS=true;
         console.log("Starting Extra Symmertic Key Test");
         SYMKEY_TEST_VALUES = {'use':1000, 'usedata':'ftp://website.net/files.tgz'}
-        SYMKEY_TEST_VALUES.key  = session_a.extraSymKey(SYMKEY_TEST_VALUES.use, SYMKEY_TEST_VALUES.usedata);
+        SYMKEY_TEST_VALUES.key  = ab2str(session_a.extraSymKey(SYMKEY_TEST_VALUES.use, SYMKEY_TEST_VALUES.usedata));
         return;
     }
 
