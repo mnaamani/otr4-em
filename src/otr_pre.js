@@ -44,9 +44,9 @@ Module['preRun'].push(function(){
       return Math.floor(Math.random() * 256);
     }));
     
-    _static_buffer_ptr = allocate(4096,"i8",ALLOC_STATIC); 
-    _static_new_mpi_ptr_ptr = allocate(4,"i8",ALLOC_STATIC);
-    _static_otr_error_message_str = allocate(512,"i8",ALLOC_STATIC);
+    _static_buffer_ptr = allocate(4096,"i8",ALLOC_NORMAL);
+    _static_new_mpi_ptr_ptr = allocate(4,"i8",ALLOC_NORMAL);
+    _static_otr_error_message_str = allocate(512,"i8",ALLOC_NORMAL);
 
     Module["libgcrypt"] = {};
     Module["libgcrypt"]["mpi_new"] = gcry_.mpi_new = cwrap('_gcry_mpi_new','number',['number']);
