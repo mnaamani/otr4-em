@@ -1,5 +1,3 @@
-var Module = {};
-
 Module["preRun"]=[];
 
 Module["MPI_HOOK"] = {};
