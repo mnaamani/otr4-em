@@ -70,6 +70,8 @@ Module['preRun'].push(function(){
     Module["libotrl"]["message_respond_smp"]=otrl_.message_respond_smp=cwrap('otrl_message_respond_smp','',['number','number','number','number','string','number']);
     Module["libotrl"]["message_abort_smp"]=otrl_.message_abort_smp=cwrap('otrl_message_abort_smp','',['number','number','number','number']);
     Module["libotrl"]["message_receiving"]=otrl_.message_receiving=cwrap('otrl_message_receiving','number',['number','number','number','string','string','string','string','number','number','number','number','number']);
+    Module["libotrl"]["message_poll_get_default_interval"]=otrl_.message_poll_get_default_interval=cwrap('otrl_message_poll_get_default_interval','number',['number']);
+    Module["libotrl"]["message_poll"]=otrl_.message_poll=cwrap('otrl_message_poll','',['number','number','number']);
     Module["libotrl"]["instag_generate"]=otrl_.instag_generate=cwrap('otrl_instag_generate','number',['number','string','string','string']);
     Module["libotrl"]["instag_read"]=otrl_.instag_read=cwrap('otrl_instag_read','number',['number','string']);
     Module["libotrl"]["instag_write"]=otrl_.instag_write=cwrap('otrl_instag_write','number',['number','string']);
