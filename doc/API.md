@@ -296,15 +296,30 @@ The policy is used as a parameter when setting up a Session().
     DEFAULT
 
 ## otr.VFS() - The Virtual File System
+
 The Virtual File System (vfs) can be easily serialed to JSON for simple import and export to persist key and fingerprint files.
+All file system operations are synchronous and overwrite existing files.
 
      var VFS = otr.VFS();
 
-### VFS.save( vfs_file_location )
-Takes a snapshop of the vfs and stores it on the real filesystem in at location 'filename'.
- 
-### VFS.load( vfs_file_location )
-Loads a vfs stored in localfile 'filename'
+### VFS.save( filename )
+Takes a snapshop of the vfs and saves it disk on the real filesystem. If no filename is provided it will be saved to "default.vfs"
 
-### VFS.exportFile( source, destination )
+### VFS.load( filename )
+Loads a vfs stored from the real file system.
+
+### VFS.exportFile(source,destination, [function transform(buffer){}])
 Copies a file from the vfs to the real file system.
+An Optional 'transform' function will be passed the entire contents of the virtual file as a Buffer before it is written to disk.
+The transform function must return a Buffer to be written to disk. (You could use this to encrypt the file)
+
+### VFS.importFile(source,destination, [function transform(buffer){}])
+Copies a file from the real file system to the vfs.
+An Optional 'transform' function will be passed the contents of the file as a Buffer before it is imported to the vfs.
+The transform function must return a Buffer to be written to the vfs file. (You could use this to decrypt the file)
+
+### VFS.export()
+Returns a JSON string snapshot of the VFS.
+
+### VFS.import(vfs_string)
+Imports a JSON string snapshot and installs it as the VFS.
