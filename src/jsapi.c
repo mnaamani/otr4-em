@@ -527,17 +527,10 @@ const char * msgops_callback_otr_error_message(void *opdata, ConnContext *contex
 void msgops_callback_otr_error_message_free(void *opdata, const char *err_msg){
     //_msgops_callback_otr_error_message_free(opdata,err_msg);
 }
-const char * msgops_callback_resent_msg_prefix(void *opdata, ConnContext *context){
-    //return("");//is it valid to have empty string as the resent prefix?
-    return "[R]";
-}
-void msgops_callback_resent_msg_prefix_free(void *opdata, const char *prefix){
-    return;
-}
+
 void msgops_callback_handle_smp_event(void *opdata, OtrlSMPEvent smp_event,
         ConnContext *context, unsigned short progress_percent,
         char *question){
-    //_msgops_callback_handle_smp_event(opdata,smp_event,context,progress_percent,question);
     switch(smp_event){
         case OTRL_SMPEVENT_ASK_FOR_SECRET:
             _msgops_callback_smp_request(opdata,context,NULL);return;
@@ -565,16 +558,6 @@ void msgops_callback_create_instag(void *opdata, const char *accountname,
         const char *protocol){
     _msgops_callback_create_instag(opdata, accountname, protocol);
 }
-void msgops_callback_convert_msg(void *opdata, ConnContext *context,
-        OtrlConvertType convert_type, char ** dest, const char *src){
-    _msgops_callback_convert_msg(opdata, context, convert_type, dest, src);
-}
-void msgops_callback_convert_free(void *opdata, ConnContext *context, char *dest){
-    _msgops_callback_convert_free(opdata, context, dest);
-}
-void msgops_callback_timer_control(void *opdata, unsigned int interval){
-    _msgops_callback_timer_control(opdata,interval);
-}
 
 OtrlMessageAppOps* jsapi_messageappops_new(){
 
@@ -598,16 +581,11 @@ OtrlMessageAppOps* jsapi_messageappops_new(){
     ops->received_symkey = msgops_callback_received_symkey;
     ops->otr_error_message = msgops_callback_otr_error_message;
     ops->otr_error_message_free = msgops_callback_otr_error_message_free;
-    //ops->resent_msg_prefix = msgops_callback_resent_msg_prefix;
-    //ops->resent_msg_prefix_free = msgops_callback_resent_msg_prefix_free;
     ops->resent_msg_prefix = NULL;
     ops->resent_msg_prefix_free = NULL;
     ops->handle_smp_event = msgops_callback_handle_smp_event;
     ops->handle_msg_event = msgops_callback_handle_msg_event;
     ops->create_instag = msgops_callback_create_instag;
-    //ops->convert_msg = msgops_callback_convert_msg;
-    //ops->convert_free = msgops_callback_convert_free;
-    //ops->timer_control = msgops_callback_timer_control;
     ops->convert_msg = NULL;
     ops->convert_free = NULL;
     ops->timer_control = NULL;

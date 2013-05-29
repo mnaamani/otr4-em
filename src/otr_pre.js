@@ -339,19 +339,6 @@ Module['preRun'].push(function(){
         },"create_instag");
     };
     
-/* TODO
-void msgops_callback_convert_msg(void *opdata, ConnContext *context,
-        OtrlConvertType convert_type, char ** dest, const char *src){
-    _msgops_callback_convert_msg(opdata, context, convert_type, dest, src);
-}
-void msgops_callback_convert_free(void *opdata, ConnContext *context, char *dest){
-    _msgops_callback_convert_free(opdata, context, dest);
-}
-void msgops_callback_timer_control(void *opdata, unsigned int interval){
-    _msgops_callback_timer_control(opdata,interval);
-}
-*/
-
 });//preRun
 
 
