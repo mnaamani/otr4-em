@@ -1,12 +1,6 @@
 Module["preRun"]=[];
 
-Module["MPI_HOOK"] = {};
-
-if (typeof exports !== 'undefined') {
-    Module["MPI_HOOK"]["BigInt"]= require("./bigint");
-}else{
-    Module["MPI_HOOK"]["BigInt"] = this["BigInt"];
-}
+var BigInt = this["BigInt"] || require("./bigint");
 
 /* emcc is generating this code when libgpg-error is compiled to js.. :(
 __ATINIT__ = __ATINIT__.concat([
@@ -169,9 +163,9 @@ Module['preRun'].push(function(){
             var a = __mpi2bigint(mpi_a);
             var b = __mpi2bigint(mpi_b);
             //assert a.length == b.length
-            var g = Module["MPI_HOOK"]["BigInt"]["GCD"](a,b);
+            var g = BigInt["GCD"](a,b);
             __bigint2mpi(mpi_g, g);
-            if( Module["MPI_HOOK"]["BigInt"]["equalsInt"](g,1) ) return 1;
+            if( BigInt["equalsInt"](g,1) ) return 1;
             return 0;
         };
 */
@@ -182,7 +176,7 @@ Module['preRun'].push(function(){
             //r = x mod n
             var x = __mpi2bigint(mpi_x);
             var n = __mpi2bigint(mpi_n);
-            __bigint2mpi(mpi_r, Module["MPI_HOOK"]["BigInt"]["mod"](x,n));
+            __bigint2mpi(mpi_r, BigInt["mod"](x,n));
         };
         
         //console.log("overriding __gcry_mpi_powm");
@@ -193,7 +187,7 @@ Module['preRun'].push(function(){
           var bi_base = __mpi2bigint(b);
           var bi_expo = __mpi2bigint(e);
           var bi_mod  = __mpi2bigint(m);
-          var result = Module["MPI_HOOK"]["BigInt"]["powMod"](bi_base,bi_expo,bi_mod);
+          var result = BigInt["powMod"](bi_base,bi_expo,bi_mod);
           __bigint2mpi(w,result);
         };
 
@@ -204,7 +198,7 @@ Module['preRun'].push(function(){
             //console.log(">__gcry_mpi_invm()");
             var bi_a = __mpi2bigint(a);
             var bi_m = __mpi2bigint(m);
-            var result = Module["MPI_HOOK"]["BigInt"]["inverseMod"](bi_a,bi_m);
+            var result = BigInt["inverseMod"](bi_a,bi_m);
             if(result){
                 __bigint2mpi(x,result);
                 return 1;
@@ -242,14 +236,14 @@ Module['preRun'].push(function(){
             }
             if(BE.length){
                 BE.forEach(function(be){
-                    O.push(Module["MPI_HOOK"]["BigInt"]["powMod"](be.b,be.e,bi_m));
+                    O.push(BigInt["powMod"](be.b,be.e,bi_m));
                 });
-                bi_result = Module["MPI_HOOK"]["BigInt"]["str2bigInt"]("1",16);
+                bi_result = BigInt["str2bigInt"]("1",16);
                 O.forEach(function(k){
-                    bi_result = Module["MPI_HOOK"]["BigInt"]["mult"](bi_result,k);
+                    bi_result = BigInt["mult"](bi_result,k);
                 });
             }
-            bi_result = Module["MPI_HOOK"]["BigInt"]["mod"](bi_result,bi_m);
+            bi_result = BigInt["mod"](bi_result,bi_m);
             __bigint2mpi(mpi_r,bi_result);
         };
 
@@ -265,7 +259,7 @@ Module['preRun'].push(function(){
     _gen_prime = function BigInt_Prime(nbits,secretlevel,randomlevel,xtracheck,xtracheck_args){
         var mpi_prime = gcry_.mpi_new ( nbits );
         for(;;){
-            var bi_prime = Module["MPI_HOOK"]["BigInt"]["randTruePrime"](nbits);
+            var bi_prime = BigInt["randTruePrime"](nbits);
             __bigint2mpi(mpi_prime,bi_prime);
             if(xtracheck && FUNCTION_TABLE[xtracheck](xtracheck_args,mpi_prime)){                
                    continue;//prime rejected!                
@@ -415,12 +409,12 @@ function __mpi2bigint(mpi_ptr){
     var mpi_str_ptr = _static_buffer_ptr;
     var mpi_str = Module['Pointer_stringify'](mpi_str_ptr);
 
-    return Module["MPI_HOOK"]["BigInt"]["str2bigInt"](mpi_str,16);   
+    return BigInt["str2bigInt"](mpi_str,16);   
 }
 
 function __bigint2mpi(mpi_ptr,bi_num){
     var new_mpi_ptr_ptr = _static_new_mpi_ptr_ptr;
-    var bi_num_str = Module["MPI_HOOK"]["BigInt"]["bigInt2str"](bi_num,16);
+    var bi_num_str = BigInt["bigInt2str"](bi_num,16);
     //gcry_error_t gcry_mpi_scan (gcry_mpi_t *r_mpi, enum gcry_mpi_format format, const unsigned char *buffer, size_t buflen, size_t *nscanned)
     var err = gcry_.mpi_scan(new_mpi_ptr_ptr,4,bi_num_str,0,0);
     if(err){
