@@ -15,6 +15,7 @@ var FORCE_SMP = false;
 var SEND_BAD_SECRET = false;
 var INIT_KEYS = true;
 var INIT_TAGS = true;
+var SAVE_FINGERPRINTS = false;
 
 var SMP_TEST_DONE = false;
 var SMP_TEST_IN_PROGRESS = false;
@@ -34,6 +35,8 @@ if(typeof process !== "undefined" ){
     if(arg=="--bad-secret") SEND_BAD_SECRET = true;
     if(arg=="--no-init-key") INIT_KEYS = false;
     if(arg=="--no-init-tag") INIT_TAGS = false;
+    if(arg=="--save-fingerprints") SAVE_FINGERPRINTS = true;
+
  });
 }
 
@@ -211,6 +214,10 @@ function end_smp_test(){
     SMP_TEST_PASSED = session_a.isAuthenticated();
     SMP_TEST_DONE = true;
     SMP_TEST_IN_PROGRESS = false;
+    if(SAVE_FINGERPRINTS){
+        session_a.user.writeTrustedFingerprints();
+        session_b.user.writeTrustedFingerprints();
+    }
 }
 session_b.on("smp_request",function(){
         console.log("Received SMP Request.");
