@@ -21,10 +21,11 @@ EXPORTED_FUNCS= -s EXPORTED_FUNCTIONS="['_gcry_strerror','_malloc','_free','__gc
             '_otrl_message_poll', '_otrl_message_poll_get_default_interval' ]"
 
 #closure compiler makes exported VFS unusable..
-OPTIMISATION= -O2 --closure 0 --llvm-opts 1 --minify 0 -s LINKABLE=1 $(EXPORTED_FUNCS) -s ASM_JS=0
+OPTIMISATION= -O2 --closure 0 --llvm-opts 1 --minify 1 -s LINKABLE=1 $(EXPORTED_FUNCS) -s ASM_JS=0
 
 #for google chrome dev, use max O1, dont use llvm-opts
-OPTIMISATION_CHROME= -O1 --closure 1 --llvm-opts 0 --minify 0 -s LINKABLE=1 $(EXPORTED_FUNCS) -s ASM_JS=0
+#Without asm.js closure is minifiying Math.imul incorrectly!
+OPTIMISATION_CHROME= -O1 --closure 0 --llvm-opts 0 --minify 1 -s LINKABLE=1 $(EXPORTED_FUNCS) -s ASM_JS=0
 
 node:
 	mkdir -p lib/
