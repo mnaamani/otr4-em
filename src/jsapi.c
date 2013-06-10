@@ -25,53 +25,44 @@ char* jsapi_privkey_get_accountname(OtrlPrivKey* p){
 char* jsapi_privkey_get_protocol(OtrlPrivKey* p){
     return p->protocol;
 }
+
 /* Write only the TRUSTED fingerprints from store from a given OtrlUserState to a file on disk. */
 gcry_error_t jsapi_privkey_write_trusted_fingerprints(OtrlUserState us,
     const char *filename)
-{   
-    gcry_error_t err;
+{
+    gcry_error_t error;
     FILE *storef;
-
-    storef = fopen(filename, "wb");
-    if (!storef) {
-    err = gcry_error_from_errno(errno);
-    return err;
-    }
-
-    err = jsapi_privkey_write_trusted_fingerprints_FILEp(us, storef);
-
-    fclose(storef);
-    return err;
-}
-
-/* Write the fingerprint store from a given OtrlUserState to a FILE*.
- * The FILE* must be open for writing. */
-gcry_error_t jsapi_privkey_write_trusted_fingerprints_FILEp(OtrlUserState us,
-    FILE *storef)
-{   
     ConnContext *context;
-    Fingerprint *fprint;
+    Fingerprint *fingerprint;
 
-    if (!storef) return gcry_error(GPG_ERR_NO_ERROR);
+    error = gcry_error(GPG_ERR_NO_ERROR);
 
     for(context = us->context_root; context; context = context->next) {
-    /* Fingerprints are only stored in the master contexts */
-    if (context->their_instance != OTRL_INSTAG_MASTER) continue;
+        /* Fingerprints are only stored in the master contexts */
+        if (context->their_instance != OTRL_INSTAG_MASTER) continue;
 
-    /* Don't bother with the first (fingerprintless) entry. */
-    for (fprint = context->fingerprint_root.next; fprint && fprint->trust;
-        fprint = fprint->next) {
-        int i;
-        fprintf(storef, "%s\t%s\t%s\t", context->username,
-            context->accountname, context->protocol);
-        for(i=0;i<20;++i) {
-        fprintf(storef, "%02x", fprint->fingerprint[i]);
+        /* Don't bother with the first (fingerprintless) entry. */
+        for (fingerprint = context->fingerprint_root.next; fingerprint && fingerprint->trust[0]!='\0' ;
+            fingerprint = fingerprint->next) {
+            int i;
+            //only open the file if we have something to write
+            if(storef == NULL){
+                storef = fopen(filename, "wb");
+                if(!storef) {
+                    error = gcry_error_from_errno(errno);
+                    return error;
+                }
+            }
+            fprintf(storef, "%s\t%s\t%s\t", context->username,
+                context->accountname, context->protocol);
+            for(i=0;i<20;++i) {
+                fprintf(storef, "%02x", fingerprint->fingerprint[i]);
+            }
+            fprintf(storef, "\t%s\n", fingerprint->trust ? fingerprint->trust : "");
         }
-        fprintf(storef, "\t%s\n", fprint->trust ? fprint->trust : "");
     }
-    }
-
-    return gcry_error(GPG_ERR_NO_ERROR);
+  if(storef != NULL) fclose(storef);
+  return error;
 }
 
 gcry_error_t jsapi_sexp_write(FILE *privf, gcry_sexp_t sexp)
