@@ -1,6 +1,7 @@
 Module["preRun"]=[];
 
 var BigInt = this["BigInt"] || require("./bigint");
+var Random = this["Random"] || require("./random");
 
 /* emcc is generating this code when libgpg-error is compiled to js.. :(
 __ATINIT__ = __ATINIT__.concat([
@@ -23,17 +24,16 @@ Module['preRun'].push(function(){
     Module["free"]=_free;
     Module["FS"]=FS;
     FS.init();
-    //select doesn't really have a place in node environment.. since i/o is non-blocking
-    _select = (function() {
-      return 3;//this means all the three socket sets passed to the function are have sockets ready for reading.
+    __select = (function() {
+      return 1;
     });
     var devFolder = Module['FS'].findObject("/dev") || Module['FS_createFolder']("/","dev",true,true);
     Module['FS_createDevice'](devFolder,"random",(function(){
-      return Math.floor(Math.random() * 256);
+      return Random.getByte();
     }));
 
     Module['FS_createDevice'](devFolder,"urandom",(function(){
-      return Math.floor(Math.random() * 256);
+      return Random.getByte();
     }));
     
     _static_buffer_ptr = allocate(4096,"i8",ALLOC_NORMAL);
@@ -213,21 +213,6 @@ Module['preRun'].push(function(){
             bi_result = BigInt["mod"](bi_result,bi_m);
             __bigint2mpi(mpi_r,bi_result);
         };
-
-    /*static gcry_mpi_t gen_prime (unsigned int nbits, int secret, int randomlevel,
-                             int (*extra_check)(void *, gcry_mpi_t),
-                             void *extra_check_arg);*/
-    _gen_prime = function BigInt_Prime(nbits,secretlevel,randomlevel,xtracheck,xtracheck_args){
-        var mpi_prime = gcry_.mpi_new ( nbits );
-        for(;;){
-            var bi_prime = BigInt["randTruePrime"](nbits);
-            __bigint2mpi(mpi_prime,bi_prime);
-            if(xtracheck && FUNCTION_TABLE[xtracheck](xtracheck_args,mpi_prime)){                
-                   continue;//prime rejected!                
-            }
-            return mpi_prime;
-        }
-    };
 
 // __msgops_callback_ functions are called from jsapi.c to bubble up to 
 // to eventually fire the corresponding event emitted by otr.Session()
