@@ -33,7 +33,7 @@ node:
         -o lib/_libotr4.js \
         --pre-js src/otr_pre.js \
         -s TOTAL_MEMORY=1048576  -s TOTAL_STACK=409600 \
-        $(OPTIMISATION)
+        $(OPTIMISATION) --js-library src/library_gcrypt.js
 	cat src/header.js lib/_libotr4.js src/footer.js > lib/libotr4.js
 	rm lib/_libotr4.js
 
@@ -43,6 +43,6 @@ chrome:
         -o lib/_libotr4.js \
         --pre-js src/otr_pre.js \
         -s TOTAL_MEMORY=1048576  -s TOTAL_STACK=409600 \
-        $(OPTIMISATION_CHROME)
+        $(OPTIMISATION_CHROME) --js-library src/library_gcrypt.js
 	cat src/header.js lib/_libotr4.js src/footer.js > lib/libotr4-chrome.js
 	rm lib/_libotr4.js
