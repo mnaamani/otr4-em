@@ -34,7 +34,8 @@ mergeInto(LibraryManager.library, {
     '}});',
   $GCRYPT: {},
   
-  _mpi2bigint__postset: '__mpi2bigint.buffer = allocate(4096, "i8", ALLOC_STATIC);',
+  _mpi2bigint__postset: '__mpi2bigint.buffer = allocate(4096, "i8", ALLOC_STATIC);'+
+                        'Module["mpi2bigint"]=__mpi2bigint;',
   _mpi2bigint__deps:['$GCRYPT','_gcry_mpi_print','_gcry_strerror'],
   _mpi2bigint: function (mpi_ptr){
      //gcry_error_t gcry_mpi_print (enum gcry_mpi_format format, unsigned char *buffer, size_t buflen, size_t *nwritten, const gcry_mpi_t a)
@@ -45,7 +46,8 @@ mergeInto(LibraryManager.library, {
    },
    
    _bigint2mpi__postset: '__bigint2mpi.handle = allocate(1,"i32", ALLOC_STATIC);'+
-                         '__bigint2mpi.buffer = allocate(4096,"i8", ALLOC_STATIC);',
+                         '__bigint2mpi.buffer = allocate(4096,"i8", ALLOC_STATIC);'+
+                         'Module["bigint2mpi"]=__bigint2mpi;',
    _bigint2mpi__deps: ['$GCRYPT','_gcry_mpi_scan','_gcry_strerror','_gcry_mpi_set','_gcry_mpi_release'],
    _bigint2mpi: function(mpi_ptr,bi_num){
         var bi_num_str = BIGINT["bigInt2str"](bi_num,16);
