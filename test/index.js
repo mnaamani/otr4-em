@@ -80,8 +80,6 @@ var session_a = new otr.Session(alice, BOB,{
     buddy:"BOB", 
     accountname:alice_settings.accountname,
     protocol:alice_settings.protocol
-//    create_privkey: make_key_for_user,
-//    create_instag: make_instag_for_user
 });
 
 ///setting up Bob's side of the connection
@@ -95,8 +93,6 @@ var session_b = new otr.Session(bob,ALICE,{
     policy:otr.POLICY("ALWAYS"),
     secret:'s3cr37',
     MTU:3000,
-    create_privkey: make_key_for_user,
-    create_instag: make_instag_for_user
 });
 
 function make_key_for_user(user,accountname,protocol){
@@ -110,10 +106,8 @@ function make_key_for_user(user,accountname,protocol){
         }else debug("Key Generated Successfully");
     });
 
-    //if(this.connect) this.connect();//resend a query when after key is generated
 }
 function make_instag_for_user(user,accountname,protocol){
-//    if( user.findInstag(accountname,protocol) return;
     user.generateInstag(accountname,protocol,function(err,instag){
         debug("new instance tag for",user.name,":",instag);
     });
