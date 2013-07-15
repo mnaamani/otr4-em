@@ -31,7 +31,11 @@ otrl_instag_t jsapi_conncontext_get_their_instance(ConnContext* ctx);
 otrl_instag_t jsapi_conncontext_get_our_instance(ConnContext* ctx);
 ConnContext* jsapi_conncontext_get_master(ConnContext* ctx);
 otrl_instag_t jsapi_instag_get_tag(OtrlInsTag *instag);
+int jsapi_can_start_smp(ConnContext* ctx);
 
+OtrlMessageAppOps* jsapi_messageappops_new();
+
+//msgops_callback_* functions implemented in library_otr.js
 OtrlPolicy msgops_callback_policy(void *opdata,ConnContext *context);
 
 void msgops_callback_create_privkey(void *opdata, const char *accountname, 
@@ -76,6 +80,4 @@ void msgops_callback_convert_msg(void *opdata, ConnContext *context,
 void msgops_callback_convert_free(void *opdata, ConnContext *context, char *dest);
 void msgops_callback_timer_control(void *opdata, unsigned int interval);
 
-OtrlMessageAppOps* jsapi_messageappops_new();
 
-int jsapi_can_start_smp(ConnContext* ctx);
