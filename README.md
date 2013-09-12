@@ -4,7 +4,7 @@ This module exposes a simple evented API which wraps around libotr4.0.0 compiled
 
 You can install the module directly from npm registry:
 
-    npm -g install otr4-em
+    npm install otr4-em
 
 Read the [API Documentation](https://github.com/mnaamani/otr4-em/blob/master/doc/API.md)
 
