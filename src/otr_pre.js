@@ -1,6 +1,6 @@
-Module["preRun"]=[];
-
-Module['preRun'].push(function(){
+var Module;
+this["Module"] = Module = {
+ 'preRun': function(){
     Module["FS"]=FS;
     Module["FS_findObject"]=FS.findObject;
     Module["FS_readDataFile"]=function(path){
@@ -76,6 +76,5 @@ Module['preRun'].push(function(){
     Module["jsapi"]["instag_get_tag"]=cwrap('jsapi_instag_get_tag','number',['number']);
     Module["jsapi"]["initialise"]=cwrap('jsapi_initialise');
     Module["jsapi"]["messageappops_new"]=cwrap('jsapi_messageappops_new','number',[]);
-
-});
-
+  }
+};
