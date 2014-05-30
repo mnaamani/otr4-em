@@ -7,6 +7,7 @@
 #include <libotr/message.h>
 #include <libotr/serial.h>
 #include <emscripten/emscripten.h>
+#include <sys/stat.h>
 
 void jsapi_initialise();
 OtrlPrivKey* jsapi_userstate_get_privkey_root(OtrlUserState us);
