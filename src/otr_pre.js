@@ -19,7 +19,7 @@ this["Module"] = Module = {
     Module["libgcrypt"]["strerror"] = cwrap('gcry_strerror','string',['number']);
 
     Module["libotrl"] = {};
-    Module["libotrl"]["version"] = cwrap('otrl_version','string');    
+    Module["libotrl"]["version"] = cwrap('otrl_version','string',[]);    
     Module["libotrl"]["userstate_create"]=cwrap('otrl_userstate_create','',['number']);
     Module["libotrl"]["userstate_free"]=cwrap('otrl_userstate_free','',['number']);
     Module["libotrl"]["privkey_read"]=cwrap('otrl_privkey_read','number',['number','string']);
@@ -74,7 +74,7 @@ this["Module"] = Module = {
     Module["jsapi"]["conncontext_get_our_instance"]=cwrap('jsapi_conncontext_get_our_instance','number',['number']);
     Module["jsapi"]["conncontext_get_master"]=cwrap('jsapi_conncontext_get_master','number',['number']);
     Module["jsapi"]["instag_get_tag"]=cwrap('jsapi_instag_get_tag','number',['number']);
-    Module["jsapi"]["initialise"]=cwrap('jsapi_initialise');
+    Module["jsapi"]["initialise"]=cwrap('jsapi_initialise','',[]);
     Module["jsapi"]["messageappops_new"]=cwrap('jsapi_messageappops_new','number',[]);
   }
 };
