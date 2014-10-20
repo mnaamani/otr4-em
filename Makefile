@@ -70,7 +70,7 @@ EXPORTED_FUNCS= -s EXPORTED_FUNCTIONS="[ \
 ]"
 
 #closure compiler makes exported VFS unusable..
-OPTIMISATION= -O2 --closure 0 --llvm-opts 1 -s LINKABLE=1 $(EXPORTED_FUNCS) -s ASM_JS=1
+OPTIMISATION= -O2 --closure 0 --llvm-opts 1 -s LINKABLE=1 $(EXPORTED_FUNCS) -s ASM_JS=1 --memory-init-file 0
 
 module:
 	mkdir -p lib/

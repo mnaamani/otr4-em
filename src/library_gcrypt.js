@@ -5,8 +5,8 @@ mergeInto(LibraryManager.library, {
   $GCRYPT__deps: ['i32______gpg_err_init_to_void_____','$BIGINT'],
   $GCRYPT__postset:
     '__ATINIT__.push({ func: function() {'+
-    '   if(!FS.init.initialized) FS.init();'+
-    '   var devFolder = FS.findObject("/dev") || Module["FS_createFolder"]("/","dev",true,true);'+
+    '  //emscripten will use crypto module/object to generate a secure random if found. \n'+
+    '  //we will fail with an exception if crypto object not found. do not fallback to Math.Random! \n'+
     '   var crypto_object;'+
     '   if(typeof window !== "undefined" && typeof window.crypto !== "undefined"){'+
     '       crypto_object = window.crypto;'+
@@ -15,22 +15,7 @@ mergeInto(LibraryManager.library, {
     '   }else{'+
     '       crypto_object = Module["crypto"];'+
     '   }'+
-    '   var randomByte = (function(crypto){'+
-    '       if(!crypto) throw new Error("no source of random data found!");'+
-    '       if(crypto["randomBytes"]) {'+
-    '          return (function(){'+
-    '            return crypto["randomBytes"](1)[0];'+
-    '          });'+
-    '       }else{'+
-    '         return (function(){'+
-    '            var buf = new Uint8Array(1);'+
-    '            crypto["getRandomValues"](buf);'+
-    '            return buf[0];'+
-    '         });'+
-    '       }'+
-    '   })( crypto_object );'+
-    '   Module["FS_createDevice"](devFolder,"random",randomByte);'+
-    '   Module["FS_createDevice"](devFolder,"urandom",randomByte);'+
+    '   if(!crypto_object) throw new Error("source of secure random data not found!");'+
     '}});',
   $GCRYPT: {},
   
