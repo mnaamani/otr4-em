@@ -1,6 +1,6 @@
 # OTR4-em - Off-the-Record Messaging [emscripten]
 
-This module exposes a simple evented API which wraps around libotr4.0.0 compiled to javascript using the emscripten compiler.
+This module exposes a simple event emitting API which wraps around libotr4.1.0 compiled to javascript using the emscripten compiler.
 
 You can install the module directly from npm registry:
 
@@ -22,7 +22,7 @@ GPLv2
 
 ### built on
 - [crypto-emscipten](https://github.com/mnaamani/crypto-emscripten/) libgcrypt/libotr builder.
-- [libotr4.0.0](http://www.cypherpunks.ca/otr/) Off-The-Record Messaging library (GPLv2)
+- [libotr4](http://www.cypherpunks.ca/otr/) Off-The-Record Messaging library (GPLv2)
 - [Emscripten](https://github.com/kripken/emscripten) Emscripten (MIT)
 
 Important Note:
