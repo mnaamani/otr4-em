@@ -5,7 +5,7 @@ Building the libotr4.js
 2. [Setup crypto-emscripten build script](https://github.com/mnaamani/crypto-emscripten). 
 This will be used to compile libgpg-error,libgcrypt and libotr into bitcode.
     
-In the root directory of crypto-emscripten folder, edit **build-libs.sh** and set *LIBOTR_VERSION* to *4.0.0*.
+In the root directory of crypto-emscripten folder, edit **build-libs.sh** and set *LIBOTR_VERSION* to *4.1.0*.
 
 Then run the build script.
 
