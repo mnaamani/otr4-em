@@ -9,7 +9,6 @@ console.log("== loaded libotr version:",otr.version());
 
 var debug = function(){};
 
-var USE_VFS = false;
 var verbose =true;
 var FORCE_SMP = false;
 var SEND_BAD_SECRET = false;
@@ -30,7 +29,6 @@ var SYMKEY_TEST_VALUES = {};
 if(typeof process !== "undefined" ){
  process.argv.forEach(function(arg){
     if(arg=="--verbose") verbose = true;
-    if(arg=="--vfs") USE_VFS=true;
     if(arg=="--force-smp") FORCE_SMP=true;
     if(arg=="--bad-secret") SEND_BAD_SECRET = true;
     if(arg=="--no-init-key") INIT_KEYS = false;
@@ -43,10 +41,6 @@ if(typeof process !== "undefined" ){
 if(verbose){
     otr.debugOn();
     debug = function(){console.log([].join.call(arguments," "));};
-}
-
-if(USE_VFS){
-    var VFS = otr.VFS("./default.vfs").load();
 }
 
 var keys_dir = ".";
@@ -297,7 +291,6 @@ function exit_test(msg,TEST_PASSED){
     if(SYMKEY_TEST_DONE) console.log("SYMKEY TEST", SYMKEY_TEST_PASSED?"PASSED":"FAILED");
 
     if(TEST_PASSED){ console.log("== TEST PASSED ==\n"); } else { console.log("== TEST FAILED ==\n"); }
-    if(VFS) VFS.save();
     process.exit();
 }
 

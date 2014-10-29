@@ -13,11 +13,7 @@ var settings = {
     'vfs_path': './alice.vfs'
 }
 
-var VFS = otr.VFS().load( settings.vfs_path );
-
 test();
-
-VFS.save( settings.vfs_path );
 
 function test(){
     var user = new otr.User({

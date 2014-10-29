@@ -4,10 +4,10 @@ OTR4-em - Off-the-Record Messaging [emscripten]
 ## Getting started
 
 Require the otr4-em module (underlying gcrypt and otr libraries will be
-initialised. 
+initialised.
 
     var otr = require("otr4-em");
-    
+
 ## otr.version()
 Returns version information of the underlying libotr:
 
@@ -17,14 +17,14 @@ Returns version information of the underlying libotr:
 The User object is used to manage a user's accounts (public keys) and known fingerprints.
 
     var otr = require("otr4-em");
-    
-    var user = new otr.User({ 
+
+    var user = new otr.User({
         keys:'/alice.keys',      //path to OTR keys file (required)
-        fingerprints:'/alice.fp' //path to fingerprints file (required)
+        fingerprints:'/alice.fp', //path to fingerprints file (required)
         instags:'/alice.instags' //path to instance tags file (required)
     });
 
-All data is loaded in memory (UserState) and persisted on the virtual file system VFS().
+All data is loaded in memory (UserState) and stored on the virtual file system VFS().
 
 If specified files exist the keys, fingerprints and instance tags will be loaded automatically.
 A warning will be logged to the console otherwise.
@@ -65,10 +65,10 @@ Creating an instance tag for account/protocol:
             console.log("new instance tag:",instag);
         }
    });
-   
+
 ### user.fingerprint(accountname,protocol)
 
-To retreive the fingerprint of a key:
+To retrieve the fingerprint of a key:
 
 	user.fingerprint("alice@jabber.org","xmpp");
 
@@ -78,14 +78,14 @@ returns
 
 ### user.findKey(accountname,protocol)
 Returns an OtrlPrivKey() instance if it exists. (null otherwise)
-	
+
 	var privkey = user.findKey("alice@jabber.org","xmpp");
 
 ### user.deleteKey(accountname,protocol)
 Deleted a key from memory and file if it exists.
 
 ### user.ConnContext(accountname, protocol, buddy_name)
-Create a ConnContext(). accountname and protocol will select the key to use in this context, and buddy_name 
+Create a ConnContext(). accountname and protocol will select the key to use in this context, and buddy_name
 is our chosen name for the remote party which is stored in the fingerprints file.
 
 ### user.writeFingerprints()
@@ -175,9 +175,9 @@ are event emitters.
     var session = new otr.Session(user, context, {
         policy: otr.POLICY("ALWAYS"), //optional policy - default = otr.POLICY("DEFAULT")
         MTU: 5000,          //optional - max fragment size in bytes - default=0,no-fragmentation
-        secret: "SECRET",   //secret for SMP authentication.                           
+        secret: "SECRET",   //secret for SMP authentication.
         secrets: {'question-1':'secret-1',
-                  'question-2':'secret-2'} //questions,answers pairs for SMP Authentication.
+                  'question-2':'secret-2'} //question and answer pairs for SMP Authentication.
     });
 
 ### Starting and Ending an OTR conversation
@@ -208,12 +208,12 @@ Starts SMP authentication. If otional [secret] is not passed it is taken from th
 
 **session.start_smp_question(question,[secret])**
 
-Starts SMP authentication with a question and optional [secret]. If secret is not passed 
+Starts SMP authentication with a question and optional [secret]. If secret is not passed
 it is taken from the parameters.
 
 **session.respond_smp([secret])**
 
-Responds to SMP authentication request with optional [secret]. If secret is not passed 
+Responds to SMP authentication request with optional [secret]. If secret is not passed
 it is taken from the parameters.
 
 ### State of a Session
@@ -228,7 +228,7 @@ True only if the fingerprint of the buddy has been authenticated/verified by SMP
 
 ### Handling Session events
 
-* message(msg, encrypted) - received message **msg**. If message was encrypted **encrypted** will be true. 
+* message(msg, encrypted) - received message **msg**. If message was encrypted **encrypted** will be true.
 
 * inject_message(msg_fragment) - encrypted msg_fragment to be sent to buddy
 
@@ -253,7 +253,7 @@ True only if the fingerprint of the buddy has been authenticated/verified by SMP
 buddy has sent additional use information and use-specific data in **use_num** (number) and **usedata_buff** (ArrayBuffer).
 **key_buff** is the 32-byte ArrayBuffer holding the synchronised symmetric key.
 
-## otr.MSGEVENT(event_number)   
+## otr.MSGEVENT(event_number)
 Returns on of the corresponding event names below of event_number
 
     NONE
@@ -297,29 +297,18 @@ The policy is used as a parameter when setting up a Session().
 
 ## otr.VFS() - The Virtual File System
 
-The Virtual File System (vfs) can be easily serialed to JSON for simple import and export to persist key and fingerprint files.
-All file system operations are synchronous and overwrite existing files.
+The Virtual File System (vfs) is a volatile in memory file system which stores keys and fingerprints.
 
      var VFS = otr.VFS();
 
-### VFS.save( filename )
-Takes a snapshop of the vfs and saves it disk on the real filesystem. If no filename is provided it will be saved to "default.vfs"
-
-### VFS.load( filename )
-Loads a vfs stored from the real file system.
 
 ### VFS.exportFile(source,destination, [function transform(buffer){}])
 Copies a file from the vfs to the real file system.
-An Optional 'transform' function will be passed the entire contents of the virtual file as a Buffer before it is written to disk.
-The transform function must return a Buffer to be written to disk. (You could use this to encrypt the file)
+An Optional 'transform' function will be passed the entire contents of the virtual file as a Buffer before it is written to disk. This operation is synchronous and overwrites an existing file.
+The transform function must return a Buffer to be written to disk. (You could use this to encrypt the file for example)
+
 
 ### VFS.importFile(source,destination, [function transform(buffer){}])
 Copies a file from the real file system to the vfs.
-An Optional 'transform' function will be passed the contents of the file as a Buffer before it is imported to the vfs.
+An Optional 'transform' function will be passed the contents of the file as a Buffer before it is imported to the vfs. This operation is synchronous and overwrites an existing file.
 The transform function must return a Buffer to be written to the vfs file. (You could use this to decrypt the file)
-
-### VFS.export()
-Returns a JSON string snapshot of the VFS.
-
-### VFS.import(vfs_string)
-Imports a JSON string snapshot and installs it as the VFS.
