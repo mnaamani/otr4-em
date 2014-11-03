@@ -8,7 +8,7 @@ var settings = {
     'key_file':'alice.keys',
     'fp_file': 'alice.fp',
     'instags_file':'alice.instags',
-    'accountname':'alice@telechat.org',
+    'accountname':'alice@-weir.dAdfh.com_',
     'protocol': 'telechat',
     'vfs_path': './alice.vfs'
 }
@@ -25,17 +25,18 @@ function test(){
 
     var key = user.findKey(settings.accountname,settings.protocol); 
     if(key) print( key.export() );
-    
+
     if(!key){
         user.generateKey(settings.accountname,settings.protocol,function(err,key){
           if(err) {
             print("error generating key:",err);
           }else{
             print("generated key:",key.export());
+	    otr.VFS().exportFile(settings.key_file,'./alice.keys');
           }
         });
     }
     
-    print(user.state.accounts());
+    print(user.accounts());
     user.deleteKey(settings.accountname,settings.protocol);
 }
