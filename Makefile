@@ -69,8 +69,7 @@ EXPORTED_FUNCS= -s EXPORTED_FUNCTIONS="[ \
   '_jsapi_instag_get_tag' \
 ]"
 
-#closure compiler makes exported VFS unusable..
-OPTIMISATION= -O2 --closure 0 --llvm-opts 1 -s LINKABLE=1 $(EXPORTED_FUNCS) -s ASM_JS=1 --memory-init-file 0
+OPTIMISATION= -O2 --closure 1 --llvm-opts 1 -s LINKABLE=1 $(EXPORTED_FUNCS) -s ASM_JS=1 --memory-init-file 0
 
 module:
 	mkdir -p lib/
