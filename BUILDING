@@ -28,4 +28,4 @@ Either run:
 
 4. Run a test
 
-    node test
+    node examples/index.js
