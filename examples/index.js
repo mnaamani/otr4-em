@@ -4,11 +4,7 @@ if(typeof exports !== 'undefined'){
 }
 
 var otr = OTR;
-
-console.log("== loaded libotr version:",otr.version());
-
-var debug = function(){};
-
+var document = document || {};
 var verbose =true;
 var FORCE_SMP = false;
 var SEND_BAD_SECRET = false;
@@ -38,9 +34,14 @@ if(typeof process !== "undefined" ){
  });
 }
 
-if(verbose){
-    otr.debugOn();
-    debug = function(){console.log([].join.call(arguments," "));};
+debug("== loaded libotr version:",otr.version());
+
+function debug(){
+	if(document.write) {
+	  document.write([].join.call(arguments," ")+"<br/>");
+	}else{
+	  console.log([].join.call(arguments," "));
+	}
 }
 
 var keys_dir = ".";
@@ -71,7 +72,7 @@ var session_a = new otr.Session(alice, BOB,{
     policy:otr.POLICY("ALWAYS"),
     secret:'s3cr37',
     MTU:3000,
-    buddy:"BOB", 
+    buddy:"BOB",
     accountname:alice_settings.accountname,
     protocol:alice_settings.protocol
 });
@@ -92,10 +93,10 @@ var session_b = new otr.Session(bob,ALICE,{
 function make_key_for_user(user,accountname,protocol){
     if( user.findKey(accountname,protocol) ) return;
 
-    console.log("creating a new key for:",user.name,accountname,protocol);
+    debug("creating a new key for:",user.name,accountname,protocol);
     user.generateKey(accountname,protocol,function(err,key){
         if(err){
-            console.log(err);
+            debug(err);
             process.exit();
         }else debug("Key Generated Successfully");
     });
@@ -119,7 +120,7 @@ function handle_messages(O,callback){
 }
 
 //simulate a network connection between two parties
-session_a.on("inject_message",function(msg){    
+session_a.on("inject_message",function(msg){
     debug("ALICE:",msg);
     NET_QUEUE_A.push({session:session_b,msg:msg});
 });
@@ -129,7 +130,7 @@ session_b.on("inject_message",function(msg){
 });
 
 session_a.on("create_privkey",function(a,p){
-    console.log("Alice doesn't have a key.. creating a new key for:",a,p);
+    debug("Alice doesn't have a key.. creating a new key for:",a,p);
     alice.generateKey(a,p,function(err,key){
         if(!err){
             debug("Alice's Key Generated Successfully");
@@ -137,7 +138,7 @@ session_a.on("create_privkey",function(a,p){
     });
 });
 session_b.on("create_privkey",function(a,p){
-    console.log("Bob doesn't have a key.. creating a new key for:",a,p);
+    debug("Bob doesn't have a key.. creating a new key for:",a,p);
     bob.generateKey(a,p,function(err,key){
         if(!err){
             debug("Bob's Key Generated Successfully");
@@ -152,19 +153,19 @@ session_b.on("create_instag",function(a,p){
 });
 
 session_a.on("gone_secure",function(){
-    console.log("[Alice] Encrypted Connection Established - Gone Secure.");
+    debug("[Alice] Encrypted Connection Established - Gone Secure.");
 });
 session_a.on("gone_secure",function(){
-    console.log("[Bob] Encrypted Connection Established - Gone Secure.");
+    debug("[Bob] Encrypted Connection Established - Gone Secure.");
 });
 
 //output incoming messages to console
 function print_message(name,msg,encrypted){
     if(encrypted) {
-        console.log(name+'[ENCRYPTED]:',msg);
+        debug(name+'[ENCRYPTED]:',msg);
     }else{
-        console.log(name+'[PLAINTEXT]:',msg);
-    }    
+        debug(name+'[PLAINTEXT]:',msg);
+    }
 }
 //alice received message from bob
 session_a.on("message",function(msg,encrypted){
@@ -178,7 +179,7 @@ session_b.on("message",function(msg,encrypted){
 });
 
 session_a.on("remote_disconnected",function(){
-    console.log("Session was closed remotely");
+    debug("Session was closed remotely");
     exit_test("",true);
 
 });
@@ -186,7 +187,7 @@ session_a.on("remote_disconnected",function(){
 session_b.on("received_symkey",function(use,usedata,key){
     SYMKEY_TEST_IN_PROGRESS = false;
     SYMKEY_TEST_DONE = true;
-    console.log("Received Symmetric Key");
+    debug("Received Symmetric Key");
     debug("    use:", use);
     debug("usedata:", ab2str(usedata));
     debug("    key:", ab2str(key));
@@ -198,7 +199,7 @@ session_b.on("received_symkey",function(use,usedata,key){
 });
 
 function end_smp_test(){
-    console.log("SMP TEST DONE");
+    debug("SMP TEST DONE");
     SMP_TEST_PASSED = session_a.isAuthenticated();
     SMP_TEST_DONE = true;
     SMP_TEST_IN_PROGRESS = false;
@@ -208,7 +209,7 @@ function end_smp_test(){
     }
 }
 session_b.on("smp_request",function(){
-        console.log("Received SMP Request.");
+        debug("Received SMP Request.");
         if(!SEND_BAD_SECRET){
             debug("responding with correct secret");
             this.respond_smp('s3cr37');
@@ -232,7 +233,7 @@ session_a.connect();
 //session_b.connect();
 
 var loop = setInterval(function(){
-    console.log("_");
+    debug("_");
 
     //wait for secure session to be established
     if(!session_a.isEncrypted() && !session_b.isEncrypted()) return;
@@ -248,10 +249,10 @@ var loop = setInterval(function(){
         if(!session_a.isAuthenticated() || FORCE_SMP){
             SMP_TEST_IN_PROGRESS = true;
             SMP_TEST_PERFORMED = true;
-            console.log("Starting SMP Test");
+            debug("Starting SMP Test");
             session_a.start_smp();
         }else{
-            console.log("Skipping SMP Test buddies previously authenticated");
+            debug("Skipping SMP Test buddies previously authenticated");
             SMP_TEST_DONE = true;
         }
         return;
@@ -260,13 +261,13 @@ var loop = setInterval(function(){
     //start symkey test (after smp test is done)
     if(!SYMKEY_TEST_DONE && SMP_TEST_DONE){
         SYMKEY_TEST_IN_PROGRESS=true;
-        console.log("Starting Extra Symmertic Key Test");
+        debug("Starting Extra Symmertic Key Test");
         SYMKEY_TEST_VALUES = {'use':1000, 'usedata':'ftp://website.net/files.tgz'}
         SYMKEY_TEST_VALUES.key  = ab2str(session_a.extraSymKey(SYMKEY_TEST_VALUES.use, SYMKEY_TEST_VALUES.usedata));
         return;
     }
 
-    //send an encrypted message 
+    //send an encrypted message
     if(session_a.isEncrypted() && SYMKEY_TEST_DONE && SMP_TEST_DONE ){
         debug("sending message");
         session_a.send("test encrypted message");
@@ -274,30 +275,30 @@ var loop = setInterval(function(){
     }
 
     exit_test("Tests did not complete...",false);
-    
+
 },500);
 
 function exit_test(msg,TEST_PASSED){
-    console.log(msg);
+    debug(msg);
     if(loop) clearInterval(loop);
 
     dumpConnContext(session_a,"Alice's ConnContext:");
     dumpConnContext(session_b,"Bob's ConnContext:");
 
     if(SMP_TEST_PERFORMED){
-       console.log("SMP TEST PERFORMED");
-       console.log("Trusted connection after SMP? ",SMP_TEST_PASSED);
+       debug("SMP TEST PERFORMED");
+       debug("Trusted connection after SMP? ",SMP_TEST_PASSED);
     }
-    if(SYMKEY_TEST_DONE) console.log("SYMKEY TEST", SYMKEY_TEST_PASSED?"PASSED":"FAILED");
+    if(SYMKEY_TEST_DONE) debug("SYMKEY TEST", SYMKEY_TEST_PASSED?"PASSED":"FAILED");
 
-    if(TEST_PASSED){ console.log("== TEST PASSED ==\n"); } else { console.log("== TEST FAILED ==\n"); }
+    if(TEST_PASSED){ debug("== TEST PASSED ==\n"); } else { debug("== TEST FAILED ==\n"); }
     process.exit();
 }
 
 function dumpConnContext(session,msg){
-    console.log(msg,"\n",session.context.fields());
+    debug(msg,"\n",session.context.fields());
 }
 
-function ab2str(buf) {  
+function ab2str(buf) {
   return String.fromCharCode.apply(null, new Uint16Array(buf));
 }
