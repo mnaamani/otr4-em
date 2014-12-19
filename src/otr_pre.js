@@ -19,7 +19,7 @@ this["Module"] = Module = {
     Module["libgcrypt"]["strerror"] = cwrap('gcry_strerror','string',['number']);
 
     Module["libotrl"] = {};
-    Module["libotrl"]["version"] = cwrap('otrl_version','string',[]);    
+    Module["libotrl"]["version"] = cwrap('otrl_version','string',[]);
     Module["libotrl"]["userstate_create"]=cwrap('otrl_userstate_create','',['number']);
     Module["libotrl"]["userstate_free"]=cwrap('otrl_userstate_free','',['number']);
     Module["libotrl"]["privkey_read"]=cwrap('otrl_privkey_read','number',['number','string']);
@@ -51,7 +51,7 @@ this["Module"] = Module = {
     Module["libotrl"]["tlv_free"]=cwrap('otrl_tlv_free','',['number']);
     Module["libotrl"]["tlv_find"]=cwrap('otrl_tlv_find','number',['number','number']);
 
-    Module["jsapi"]={};    
+    Module["jsapi"]={};
     Module["jsapi"]["can_start_smp"]=cwrap('jsapi_can_start_smp','number',['number']);
     Module["jsapi"]["privkey_get_next"]=cwrap("jsapi_privkey_get_next",'number',['number']);
     Module["jsapi"]["privkey_get_accountname"]=cwrap("jsapi_privkey_get_accountname",'string',['number']);
@@ -76,5 +76,11 @@ this["Module"] = Module = {
     Module["jsapi"]["instag_get_tag"]=cwrap('jsapi_instag_get_tag','number',['number']);
     Module["jsapi"]["initialise"]=cwrap('jsapi_initialise','',[]);
     Module["jsapi"]["messageappops_new"]=cwrap('jsapi_messageappops_new','number',[]);
+    Module["jsapi"]["conncontext_get_master_fingerprint"]=cwrap('jsapi_conncontext_get_master_fingerprint','number',['number']);
+    Module["jsapi"]["fingerprint_get_next"]=cwrap('jsapi_fingerprint_get_next','number',['number']);
+    Module["jsapi"]["fingerprint_get_fingerprint"]=cwrap('jsapi_fingerprint_get_fingerprint','',['number','number']);
+    Module["jsapi"]["fingerprint_get_trust"]=cwrap('jsapi_fingerprint_get_trust','string',['number']);
+    Module["jsapi"]["conncontext_get_next"]=cwrap('jsapi_conncontext_get_next','number',['number']);
+    Module["jsapi"]["userstate_get_context_root"]=cwrap('jsapi_userstate_get_context_root','number',['number']);
   }
 };

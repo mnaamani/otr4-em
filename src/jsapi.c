@@ -13,6 +13,9 @@ void jsapi_initialise(){
     OTRL_INIT;
 }
 
+ConnContext* jsapi_userstate_get_context_root(OtrlUserState us){
+	return us->context_root;
+}
 OtrlPrivKey* jsapi_userstate_get_privkey_root(OtrlUserState us){
     return us->privkey_root;
 }
@@ -76,7 +79,7 @@ gcry_error_t jsapi_sexp_write(FILE *privf, gcry_sexp_t sexp)
 	return gcry_error(GPG_ERR_ENOMEM);
     }
     gcry_sexp_sprint(sexp, GCRYSEXP_FMT_ADVANCED, buf, buflen);
-    
+
     fprintf(privf, "%s", buf);
     free(buf);
 
@@ -141,7 +144,7 @@ gcry_error_t jsapi_privkey_delete(OtrlUserState us, const char *filename,
 	const char *accountname, const char *protocol)
 {
     gcry_error_t err = GPG_ERR_NO_ERROR;
-    
+
     /* remove key from userstate */
     OtrlPrivKey* existing_key = otrl_privkey_find(us,accountname,protocol);
     if( existing_key ){
@@ -149,17 +152,17 @@ gcry_error_t jsapi_privkey_delete(OtrlUserState us, const char *filename,
         err = jsapi_userstate_write_to_file(us, filename);//write out the changes
     }
     return err;
- 
+
 }
 gcry_error_t
-jsapi_privkey_get_dsa_token(OtrlPrivKey *keyToExport, const char* token, 
+jsapi_privkey_get_dsa_token(OtrlPrivKey *keyToExport, const char* token,
             unsigned char *buffer, size_t buflen, size_t *nbytes)
 {
     gcry_error_t err;
     gcry_mpi_t x;
     gcry_sexp_t dsas,xs;
     size_t nx;
-    
+
     gcry_sexp_t privkey = keyToExport->privkey;
 
     dsas = gcry_sexp_find_token(privkey, "dsa", 0);
@@ -169,19 +172,19 @@ jsapi_privkey_get_dsa_token(OtrlPrivKey *keyToExport, const char* token,
 
     xs = gcry_sexp_find_token(dsas, token, 0);
     gcry_sexp_release(dsas);
-    
+
     if (!xs) return gcry_error(GPG_ERR_UNUSABLE_SECKEY);
-    
+
     x = gcry_sexp_nth_mpi(xs, 1, GCRYMPI_FMT_USG);
     gcry_sexp_release(xs);
 
     if (!x) return gcry_error(GPG_ERR_UNUSABLE_SECKEY);
-    
+
     err =  gcry_mpi_print(GCRYMPI_FMT_HEX, buffer,buflen,nbytes,x);
     gcry_mpi_release(x);
     return err;
 }
-//copy of make_pubkey() from libotr3.2.1/src/privkey.c 
+//copy of make_pubkey() from libotr3.2.1/src/privkey.c
 /* Create a public key block from a private key */
 gcry_error_t jsapi_make_pubkey(unsigned char **pubbufp, size_t *publenp,
 	gcry_sexp_t privkey)
@@ -264,7 +267,7 @@ gcry_error_t jsapi_make_pubkey(unsigned char **pubbufp, size_t *publenp,
 }
 
 
-gcry_error_t jsapi_userstate_import_privkey(OtrlUserState us, char *accountname, char * protocol, 
+gcry_error_t jsapi_userstate_import_privkey(OtrlUserState us, char *accountname, char * protocol,
                     gcry_mpi_t p, gcry_mpi_t q, gcry_mpi_t g, gcry_mpi_t y, gcry_mpi_t x){
 
     size_t *erroff;
@@ -273,38 +276,38 @@ gcry_error_t jsapi_userstate_import_privkey(OtrlUserState us, char *accountname,
     gcry_error_t err;
     gcry_sexp_t allkeys;
     size_t i;
-    
+
     //puts("jsapi_userstate_import_privkey: building sexp");
-    
+
     err = gcry_sexp_build(&allkeys,erroff,"(privkeys (account (name %s) (protocol %s) (private-key (dsa \
         (p %M) (q %M) (g %M) (y %M) (x %M) ))))",accountname,protocol,p,q,g,y,x);
 
     if(err) return err;
-    
+
     /* forget existing account/key */
     OtrlPrivKey* existing_key = otrl_privkey_find(us,accountname,protocol);
     if( existing_key) otrl_privkey_forget(existing_key);
-    
+
     //puts("getting allkeys from sexp");
-    
+
     token = gcry_sexp_nth_data(allkeys, 0, &tokenlen);
     if (tokenlen != 8 || strncmp(token, "privkeys", 8)) {
 	    gcry_sexp_release(allkeys);
 	    return gcry_error(GPG_ERR_UNUSABLE_SECKEY);
     }
-    
+
     /* Get each account */
     for(i=1; i<gcry_sexp_length(allkeys); ++i) {
-        
+
 	    gcry_sexp_t names, protos, privs;
 	    char *name, *proto;
 	    gcry_sexp_t accounts;
 	    OtrlPrivKey *p;
-	    
+
 	    //printf("reading account #:%d\n",i);
 	    /* Get the ith "account" S-exp */
 	    accounts = gcry_sexp_nth(allkeys, i);
-	
+
 	    /* It's really an "account" S-exp? */
 	    token = gcry_sexp_nth_data(accounts, 0, &tokenlen);
 	    if (tokenlen != 7 || strncmp(token, "account", 7)) {
@@ -312,7 +315,7 @@ gcry_error_t jsapi_userstate_import_privkey(OtrlUserState us, char *accountname,
 	        gcry_sexp_release(allkeys);
 	        return gcry_error(GPG_ERR_UNUSABLE_SECKEY);
 	    }
-	    
+
 	    /* Extract the name, protocol, and privkey S-exps */
 	    names = gcry_sexp_find_token(accounts, "name", 0);
 	    protos = gcry_sexp_find_token(accounts, "protocol", 0);
@@ -395,7 +398,7 @@ gcry_error_t jsapi_userstate_import_privkey(OtrlUserState us, char *accountname,
 	    }
     }
     gcry_sexp_release(allkeys);
-    
+
     /* application should write out userstate to disk */
     return gcry_error(GPG_ERR_NO_ERROR);
 }
@@ -433,8 +436,32 @@ otrl_instag_t jsapi_conncontext_get_their_instance(ConnContext* ctx){
 otrl_instag_t jsapi_conncontext_get_our_instance(ConnContext* ctx){
     return ctx->our_instance;
 }
+
 ConnContext* jsapi_conncontext_get_master(ConnContext* ctx){
     return ctx->m_context;
+}
+
+ConnContext* jsapi_conncontext_get_next(ConnContext *ctx){
+	  return ctx->next;
+}
+
+/* get first fingerprint from master context */
+Fingerprint* jsapi_conncontext_get_master_fingerprint(ConnContext* context){
+	/* Don't bother with the first (fingerprintless) entry. */
+	return context->m_context->fingerprint_root.next;
+}
+
+Fingerprint* jsapi_fingerprint_get_next(Fingerprint *fingerprint){
+		return fingerprint->next;
+}
+
+void jsapi_fingerprint_get_fingerprint(Fingerprint *fingerprint, char* human){
+	human[0]='\0';
+	otrl_privkey_hash_to_human(human, fingerprint->fingerprint);
+}
+
+char* jsapi_fingerprint_get_trust(Fingerprint *fingerprint){
+	return fingerprint->trust;
 }
 
 otrl_instag_t jsapi_instag_get_tag(OtrlInsTag *instag){

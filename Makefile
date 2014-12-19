@@ -66,7 +66,13 @@ EXPORTED_FUNCS= -s EXPORTED_FUNCTIONS="[ \
   '_jsapi_conncontext_get_our_instance', \
   '_jsapi_conncontext_get_master',\
   '_jsapi_messageappops_new',\
-  '_jsapi_instag_get_tag' \
+  '_jsapi_instag_get_tag', \
+  '_jsapi_conncontext_get_master_fingerprint', \
+  '_jsapi_fingerprint_get_next', \
+  '_jsapi_fingerprint_get_fingerprint', \
+  '_jsapi_fingerprint_get_trust', \
+  '_jsapi_userstate_get_context_root', \
+  '_jsapi_conncontext_get_next' \
 ]"
 
 OPTIMISATION= -O2 --closure 1 --llvm-opts 1 -s LINKABLE=1 $(EXPORTED_FUNCS) -s ASM_JS=1 --memory-init-file 0
