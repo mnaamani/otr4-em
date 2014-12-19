@@ -5,21 +5,24 @@ var print = console.error;
 
 print("libotr version:",otr.version());
 
-var user = new otr.User();
+var user = new otr.User({keys:"./alice.keys"});
+
+var account = user.account("alice","xmpp");
+
+console.log("account fingerprint:", account.fingerprint());
 
 print("generating key...");
-
-user.generateKey("alice","xmpp",function(err,key){
+account.generateKey(function(err,key){
   if(err) {
     print("error generating key:",err);
   }else{
     //persist all the keys to file system
-    user.writeKeysToFS('./alice.keys');
+    user.saveKeysToFS('./alice.keys');
 
     //export an individual key to a json file
     fs.writeFileSync("./alice-xmpp-key.json",JSON.stringify(key.export()));
 
     print(user.keysToString());
-    print("generated key fingerprint:",user.fingerprint("alice","xmpp"));
+    print("generated key fingerprint:",account.fingerprint());
   }
 });

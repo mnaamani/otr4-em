@@ -3,15 +3,18 @@ var fs = require("fs");
 
 var print = console.error;
 
-var user1 = new otr.User();
-
-user1.loadKeysFromFS('./alice.keys');
-print("key fingerprint:",user1.fingerprint("alice","xmpp"));
+var user1 = new otr.User({keys:'./alice.keys'});
+var account = user1.account("alice","xmpp");
+user1.accounts().forEach(function(account){
+	console.log("account:",account.name());
+});
+print("key fingerprint:",account.fingerprint());
 
 var user2 = new otr.User();
 var json_key = JSON.parse(fs.readFileSync("./alice-xmpp-key.json"));
-user2.importKey("alice","xmpp",json_key);
-print("key fingerprint:",user2.fingerprint("alice","xmpp"));
+account = user2.account("alice","xmpp");
+account.importKey(json_key);
+print("key fingerprint:",account.fingerprint());
 
 
 var user3 = new otr.User();
@@ -24,4 +27,4 @@ var strKey = ""+
         "(x #10418E5B3CD28769589569F7CF50D4D663F84BAE#)"+
         "))))";
 user3.stringToKeys(strKey);
-print("key fingerprint:", user3.fingerprint("alice","xmpp"));
+print("key fingerprint:", user3.account("alice","xmpp").fingerprint());

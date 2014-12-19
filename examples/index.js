@@ -5,12 +5,9 @@ if(typeof exports !== 'undefined'){
 
 var otr = OTR;
 var document = document || {};
-var verbose =true;
+
 var FORCE_SMP = false;
 var SEND_BAD_SECRET = false;
-var INIT_KEYS = true;
-var INIT_TAGS = true;
-var SAVE_FINGERPRINTS = false;
 
 var SMP_TEST_DONE = false;
 var SMP_TEST_IN_PROGRESS = false;
@@ -24,13 +21,8 @@ var SYMKEY_TEST_VALUES = {};
 
 if(typeof process !== "undefined" ){
  process.argv.forEach(function(arg){
-    if(arg=="--verbose") verbose = true;
     if(arg=="--force-smp") FORCE_SMP=true;
     if(arg=="--bad-secret") SEND_BAD_SECRET = true;
-    if(arg=="--no-init-key") INIT_KEYS = false;
-    if(arg=="--no-init-tag") INIT_TAGS = false;
-    if(arg=="--save-fingerprints") SAVE_FINGERPRINTS = true;
-
  });
 }
 
@@ -44,72 +36,44 @@ function debug(){
 	}
 }
 
-var keys_dir = ".";
-
 var alice_settings ={
-    keys:keys_dir+'/alice.keys',
-    fingerprints:keys_dir+'/alice.fp',
-    instags:keys_dir+'/alice.instags',
     accountname:"alice@telechat.org",
     protocol:"telechat"
 };
 var bob_settings = {
-    keys:keys_dir+'/bob.keys',
-    fingerprints:keys_dir+'/bob.fp',
-    instags:keys_dir+'/bob.instags',
     accountname:"bob@telechat.org",
     protocol:"telechat"
 };
 
 ///setting up Alice's side of the connection
-var alice = new otr.User(alice_settings);
+var alice = new otr.User({keys:"./alice.keys",fingerprints:"./alice.fp"});
 alice.name = "Alice";
-if(INIT_KEYS) make_key_for_user(alice,alice_settings.accountname,alice_settings.protocol);
-if(INIT_TAGS) make_instag_for_user(alice,alice_settings.accountname,alice_settings.protocol);
+var alice_account = alice.account(alice_settings.accountname,alice_settings.protocol);
 
-var BOB = alice.ConnContext(alice_settings.accountname,alice_settings.protocol,"BOB");
-var session_a = new otr.Session(alice, BOB,{
-    policy:otr.POLICY("ALWAYS"),
+var BOB = alice_account.contact("BOB");
+dumpFingerprints(BOB.fingerprints());
+var session_a = BOB.openSession({
+    policy:otr.POLICY("MANUAL"),
     secret:'s3cr37',
-    MTU:3000,
-    buddy:"BOB",
-    accountname:alice_settings.accountname,
-    protocol:alice_settings.protocol
+    MTU:3000
 });
 
 ///setting up Bob's side of the connection
-var bob = new otr.User(bob_settings);
+var bob = new otr.User({keys:"./bob.keys",fingerprints:"./bob.fp"});
 bob.name = "Bob";
-if(INIT_KEYS) make_key_for_user(bob,bob_settings.accountname,bob_settings.protocol);
-if(INIT_TAGS) make_instag_for_user(bob,bob_settings.accountname,bob_settings.protocol);
+var bob_account = bob.account(bob_settings.accountname,bob_settings.protocol);
 
-var ALICE = bob.ConnContext(bob_settings.accountname,bob_settings.protocol,"ALICE");
-var session_b = new otr.Session(bob,ALICE,{
-    policy:otr.POLICY("ALWAYS"),
+
+var ALICE = bob_account.contact("ALICE");
+dumpFingerprints(ALICE.fingerprints());
+var session_b = ALICE.openSession({
+    policy:otr.POLICY("MANUAL"),
     secret:'s3cr37',
-    MTU:3000,
+    MTU:3000
 });
 
-function make_key_for_user(user,accountname,protocol){
-    if( user.findKey(accountname,protocol) ) return;
-
-    debug("creating a new key for:",user.name,accountname,protocol);
-    user.generateKey(accountname,protocol,function(err,key){
-        if(err){
-            debug(err);
-            process.exit();
-        }else debug("Key Generated Successfully");
-    });
-
-}
-function make_instag_for_user(user,accountname,protocol){
-    user.generateInstag(accountname,protocol,function(err,instag){
-        debug("new instance tag for",user.name,":",instag);
-    });
-}
-
-debug(session_a);
-debug(session_b);
+dumpConnContext(session_a,"Alice's ConnContext:");
+dumpConnContext(session_b,"Bob's ConnContext:");
 
 var NET_QUEUE_A = async.queue(handle_messages,1);
 var NET_QUEUE_B = async.queue(handle_messages,1);
@@ -131,25 +95,27 @@ session_b.on("inject_message",function(msg){
 
 session_a.on("create_privkey",function(a,p){
     debug("Alice doesn't have a key.. creating a new key for:",a,p);
-    alice.generateKey(a,p,function(err,key){
+    alice_account.generateKey(function(err,key){
         if(!err){
             debug("Alice's Key Generated Successfully");
+            alice.saveKeysToFS("./alice.keys");
         }
     });
 });
 session_b.on("create_privkey",function(a,p){
     debug("Bob doesn't have a key.. creating a new key for:",a,p);
-    bob.generateKey(a,p,function(err,key){
+    bob_account.generateKey(function(err,key){
         if(!err){
             debug("Bob's Key Generated Successfully");
+            bob.saveKeysToFS("./bob.keys");
         }
     });
 });
 session_a.on("create_instag",function(a,p){
-    make_instag_for_user(this.user,a,p);
+    alice_account.generateInstag();
 });
 session_b.on("create_instag",function(a,p){
-    make_instag_for_user(this.user,a,p);
+    bob_account.generateInstag();
 });
 
 session_a.on("gone_secure",function(){
@@ -198,15 +164,24 @@ session_b.on("received_symkey",function(use,usedata,key){
     );
 });
 
+session_a.on("write_fingerprints",function(){
+  alice.writeFingerprints();
+  alice.saveFingerprintsToFS("./alice.fp");
+  debug("Saving Bob's fingerprint");
+  dumpFingerprints(BOB.fingerprints());
+});
+session_b.on("write_fingerprints",function(){
+  bob.writeFingerprints();
+  bob.saveFingerprintsToFS("./bob.fp");
+  debug("Saving Alice's fingerprint");
+  dumpFingerprints(ALICE.fingerprints());
+});
+
 function end_smp_test(){
     debug("SMP TEST DONE");
     SMP_TEST_PASSED = session_a.isAuthenticated();
     SMP_TEST_DONE = true;
     SMP_TEST_IN_PROGRESS = false;
-    if(SAVE_FINGERPRINTS){
-        session_a.user.writeTrustedFingerprints();
-        session_b.user.writeTrustedFingerprints();
-    }
 }
 session_b.on("smp_request",function(){
         debug("Received SMP Request.");
@@ -223,14 +198,9 @@ session_a.on("smp_failed",end_smp_test);
 session_a.on("smp_aborted",end_smp_test);
 session_a.on("smp_error",end_smp_test);
 
-
-//in libotr4 if policy is ALWAYS - initial message doesn't seem to get resent after going secure
-//if buddy has an ALWAYS policy set OTR will be setup.
-//session_a.send("IF POLICY IS 'ALWAYS' THIS IS NEVER SENT");
-
-//to initially establish OTR
-session_a.connect();
-//session_b.connect();
+//start OTR
+session_a.send("?OTR?");
+//session_b.send("?OTR?");//don't start OTR simultaneously on both ends!
 
 var loop = setInterval(function(){
     debug("_");
@@ -292,11 +262,18 @@ function exit_test(msg,TEST_PASSED){
     if(SYMKEY_TEST_DONE) debug("SYMKEY TEST", SYMKEY_TEST_PASSED?"PASSED":"FAILED");
 
     if(TEST_PASSED){ debug("== TEST PASSED ==\n"); } else { debug("== TEST FAILED ==\n"); }
+
     process.exit();
 }
 
 function dumpConnContext(session,msg){
-    debug(msg,"\n",session.context.fields());
+    debug(msg,"\n",JSON.stringify(session.context.fields()));
+}
+
+function dumpFingerprints(fingerprints){
+  fingerprints.forEach(function(fp){
+    debug(fp.fingerprint(),fp.trust());
+  });
 }
 
 function ab2str(buf) {
