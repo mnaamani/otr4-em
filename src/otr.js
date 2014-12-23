@@ -22,6 +22,8 @@
     var root = this,
         otr, OTRBindings, util, events;
 
+    var USER_HOME = process.env[(process.platform == 'win32') ? 'USERPROFILE' : 'HOME'];
+
     /** The available values used for the policy parameter of an otr Session()
      *
      *  @alias module:otr.POLICY
@@ -172,31 +174,39 @@
         }
     }
 
+    function expandHomeDir(path) {
+        if (path && path[0] === '~') {
+            //expand home directory
+            return path.replace("~", USER_HOME);
+        }
+        return path;
+    }
+
     User.prototype.loadKeysFromFS = function (filename, transform) {
-        otr.VFS.importFile(filename, this.keys, transform);
+        otr.VFS.importFile(expandHomeDir(filename), this.keys, transform);
         this.state.readKeysSync(this.keys);
     };
 
     User.prototype.loadFingerprintsFromFS = function (filename, transform) {
-        otr.VFS.importFile(filename, this.fingerprints, transform);
+        otr.VFS.importFile(expandHomeDir(filename), this.fingerprints, transform);
         this.state.readFingerprintsSync(this.fingerprints);
     };
 
     User.prototype.loadInstagsFromFS = function (filename, transform) {
-        otr.VFS.importFile(filename, this.instags, transform);
+        otr.VFS.importFile(expandHomeDir(filename), this.instags, transform);
         this.state.readInstagsSync(this.instags);
     };
 
     User.prototype.saveKeysToFS = function (filename, transform) {
-        otr.VFS.exportFile(this.keys, filename, transform);
+        otr.VFS.exportFile(this.keys, expandHomeDir(filename), transform);
     };
 
     User.prototype.saveFingerprintsToFS = function (filename, transform) {
-        otr.VFS.exportFile(this.fingerprints, filename, transform);
+        otr.VFS.exportFile(this.fingerprints, expandHomeDir(filename), transform);
     };
 
     User.prototype.saveInstagsToFS = function (filename, transform) {
-        otr.VFS.exportFile(this.instags, filename, transform);
+        otr.VFS.exportFile(this.instags, expandHomeDir(filename), transform);
     };
 
     User.prototype.keysToString = function () {
