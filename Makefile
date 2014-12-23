@@ -77,7 +77,7 @@ EXPORTED_FUNCS= -s EXPORTED_FUNCTIONS="[ \
 
 OPTIMISATION= -O2 --closure 1 --llvm-opts 1 -s LINKABLE=1 $(EXPORTED_FUNCS) -s ASM_JS=1 --memory-init-file 0
 
-libotr4.js:
+libotr4.js: src/*.js lib/*.js
 	mkdir -p build/
 	$(EMCC) src/jsapi.c -I$(CRYPTO_BUILD)/include -lotr -L$(CRYPTO_BUILD)/lib \
         -o build/_libotr4.js \
@@ -87,7 +87,7 @@ libotr4.js:
 	cat src/header.js build/_libotr4.js src/footer.js > build/libotr4.js
 	rm build/_libotr4.js
 
-otr-web: libotr4.js
+otr-web: build/libotr4.js
 	cat lib/async.js lib/bigint.js build/libotr4.js src/bindings.js src/otr.js > build/otr-web.js	
 
 docs:

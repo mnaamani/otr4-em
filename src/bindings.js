@@ -40,7 +40,7 @@
         ASYNC = root.async;
         fs = undefined; //local storage?
         BigInt = root.BigInt;
-        root.OTRBindings = otrBindings;
+        root.OTRBindings = OTRBindings;
     }
 
 
