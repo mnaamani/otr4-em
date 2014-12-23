@@ -26,15 +26,12 @@ if (typeof process !== "undefined") {
     });
 }
 
+var debug = debug || function debug() {
+    console.log([].join.call(arguments, " "));
+}
+
 debug("== loaded libotr version:", otr.version());
 
-function debug() {
-    if (document.write) {
-        document.write([].join.call(arguments, " ") + "<br/>");
-    } else {
-        console.log([].join.call(arguments, " "));
-    }
-}
 
 var alice_settings = {
     accountname: "alice@telechat.org",
