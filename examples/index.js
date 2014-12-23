@@ -56,7 +56,7 @@ var alice_account = alice.account(alice_settings.accountname, alice_settings.pro
 var BOB = alice_account.contact("BOB");
 dumpFingerprints(BOB.fingerprints());
 var session_a = BOB.openSession({
-    policy: otr.POLICY.MANUAL,
+    policy: otr.POLICY.DEFAULT,
     secret: 's3cr37',
     MTU: 3000
 });
@@ -73,7 +73,7 @@ var bob_account = bob.account(bob_settings.accountname, bob_settings.protocol);
 var ALICE = bob_account.contact("ALICE");
 dumpFingerprints(ALICE.fingerprints());
 var session_b = ALICE.openSession({
-    policy: otr.POLICY.MANUAL,
+    policy: otr.POLICY.DEFAULT,
     secret: 's3cr37',
     MTU: 3000
 });
@@ -146,6 +146,14 @@ function print_message(name, msg, encrypted) {
     }
 }
 
+session_a.on("msg_event", function (e) {
+    debug(JSON.stringify(e));
+});
+
+session_b.on("msg_event", function (e) {
+    debug(JSON.stringify(e));
+});
+
 //alice received message from bob
 session_a.on("message", function (msg, encrypted) {
     print_message('<<', msg, encrypted);
@@ -199,7 +207,8 @@ function end_smp_test() {
     SMP_TEST_IN_PROGRESS = false;
 }
 
-session_b.on("smp_request", function () {
+session_b.on("smp", function (type) {
+    if (type !== "request") return;
     debug("Received SMP Request.");
     if (!SEND_BAD_SECRET) {
         debug("responding with correct secret");
@@ -210,14 +219,11 @@ session_b.on("smp_request", function () {
     }
 });
 
-session_a.on("smp_complete", end_smp_test);
-session_a.on("smp_failed", end_smp_test);
-session_a.on("smp_aborted", end_smp_test);
-session_a.on("smp_error", end_smp_test);
+session_a.on("smp", end_smp_test);
 
 //start OTR
 session_a.send("?OTR?");
-//session_b.send("?OTR?");//don't start OTR simultaneously on both ends!
+//session_b.send("?OTR?"); //don't start OTR simultaneously on both ends!
 
 var loop = setInterval(function () {
     debug("_");
@@ -262,6 +268,7 @@ var loop = setInterval(function () {
     if (session_a.isEncrypted() && SYMKEY_TEST_DONE && SMP_TEST_DONE) {
         debug("sending message");
         session_a.send("test encrypted message");
+        session_b.recv("this is an unencrypted message, during a secure session!"); //should raise a msg_event UNENCRYPTED
         return;
     }
 
