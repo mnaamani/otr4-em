@@ -24,11 +24,11 @@
         Module, ASYNC, fs, path, BigInt;
 
     if (typeof exports !== 'undefined') {
-        Module = require("./libotr4.js");
-        ASYNC = require("./async");
+        Module = require("../build/libotr4.js");
+        ASYNC = require("../lib/async");
         fs = require("fs");
         path = require("path");
-        BigInt = require("./bigint.js");
+        BigInt = require("../lib/bigint.js");
         var fs_existsSync = fs.existsSync || path.existsSync;
         if (!path.sep) {
             path.sep = (process.platform.indexOf("win") === 0) ? "\\" : "/";

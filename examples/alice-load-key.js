@@ -1,4 +1,4 @@
-var otr = require("../lib/otr-module");
+var otr = require("../index.js");
 var fs = require("fs");
 
 var print = console.error;

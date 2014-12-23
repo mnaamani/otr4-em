@@ -77,12 +77,18 @@ EXPORTED_FUNCS= -s EXPORTED_FUNCTIONS="[ \
 
 OPTIMISATION= -O2 --closure 1 --llvm-opts 1 -s LINKABLE=1 $(EXPORTED_FUNCS) -s ASM_JS=1 --memory-init-file 0
 
-module:
-	mkdir -p lib/
+libotr4.js:
+	mkdir -p build/
 	$(EMCC) src/jsapi.c -I$(CRYPTO_BUILD)/include -lotr -L$(CRYPTO_BUILD)/lib \
-        -o lib/_libotr4.js \
+        -o build/_libotr4.js \
         --pre-js src/otr_pre.js \
         -s TOTAL_MEMORY=1048576  -s TOTAL_STACK=409600 \
         $(OPTIMISATION) --js-library src/library_gcrypt.js --js-library src/library_otr.js
-	cat src/header.js lib/_libotr4.js src/footer.js > lib/libotr4.js
-	rm lib/_libotr4.js
+	cat src/header.js build/_libotr4.js src/footer.js > build/libotr4.js
+	rm build/_libotr4.js
+
+otr-web: libotr4.js
+	cat lib/async.js lib/bigint.js build/libotr4.js src/bindings.js src/otr.js > build/otr-web.js	
+
+docs:
+	jsdoc -d doc/html src/otr.js

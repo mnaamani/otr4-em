@@ -97,7 +97,7 @@
 
     if (typeof exports !== 'undefined') {
 
-        OTRBindings = require("./libotr-js-bindings.js");
+        OTRBindings = require("./bindings.js");
         util = require('util');
         events = require('events');
         otr = new OTRBindings();

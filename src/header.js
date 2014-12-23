@@ -2,7 +2,7 @@
     
     var root = this;
     var moduleScope = {
-        "BigInt": this["BigInt"] || require("./bigint.js"),
+        "BigInt": this["BigInt"] || require("../lib/bigint.js"),
     };
 
 (function(){

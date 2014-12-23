@@ -1,6 +1,6 @@
 if (typeof exports !== 'undefined') {
     var async = require("../lib/async");
-    var OTR = require("../lib/otr-module");
+    var OTR = require("../index.js");
 }
 
 var otr = OTR;
