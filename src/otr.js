@@ -447,6 +447,30 @@
         return this.ops.extraSymKey(this.user.state, this.context, use, usedata);
     };
 
+    /*TODO: add the following methods, since we dont have direct access to the
+            context object anymore.
+
+    **context.their_instance()**
+
+    returns number: instance tag of buddy
+
+    **context.our_instance()**
+
+    returns number: our instance tag
+
+    **context.protocol_version()**
+
+    return number: otr protocol version in use, eg. 3
+
+    **context.fingerprint()**
+
+    return string: fingerprint of buddy in an active Session()
+    */
+
+    Session.prototype.getContext = function () {
+        return this.context;
+    };
+
     //add a simple events API for use in the browser
     if (!Session.prototype.on) {
         Session.prototype.on = function (e, cb) {
