@@ -154,7 +154,7 @@ session_b.on("msg_event", function (e) {
 //alice received message from bob
 session_a.on("message", function (msg, encrypted) {
     print_message('<<', msg, encrypted);
-    session_b.close();
+    session_b.end();
 });
 
 //bob received message from alice
@@ -219,7 +219,7 @@ session_b.on("smp", function (type) {
 session_a.on("smp", end_smp_test);
 
 //start OTR
-session_a.send("?OTR?");
+session_a.send("?OTR?"); //or session_a.start();
 //session_b.send("?OTR?"); //don't start OTR simultaneously on both ends!
 
 var loop = setInterval(function () {

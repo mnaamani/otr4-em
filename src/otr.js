@@ -20,7 +20,7 @@
      *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
      */
     var root = this,
-        otr, OTRBindings, util, events;
+        otr, OTRBindings, util, events, nextTick;
 
     var USER_HOME = process.env[(process.platform == 'win32') ? 'USERPROFILE' : 'HOME'];
 
@@ -120,6 +120,9 @@
             POLICY: POLICY,
             MSGEVENT: MSGEVENT
         };
+
+        nextTick = process.nextTick;
+
     } else {
         OTRBindings = root.OTRBindings;
         events = undefined;
@@ -134,6 +137,9 @@
                 MSGEVENT: MSGEVENT
             };
         }
+        nextTick = function (func) {
+            setTimeout(func, 0);
+        };
     }
 
     /** Represents a users's keys, fingerprints and instance tags
@@ -359,37 +365,53 @@
         }, user.getMessagePollDefaultInterval() * 1000 || 70 * 1000);
     }
 
-    Session.prototype.connect = function () {
+    Session.prototype.start = function () {
         return this.send("?OTR?");
     };
 
     Session.prototype.send = function (message, instag) {
+        var session = this;
+
         instag = instag || 1; //default instag = BEST
         //message can be any object that can be serialsed to a string using it's .toString() method.
-        var msgout = this.ops.messageSending(this.user.state, this.context.accountname(), this.context.protocol(),
-            this.context.username(), message.toString(), instag, this);
+        var msgout = session.ops.messageSending(session.user.state, session.context.accountname(),
+            session.context
+            .protocol(),
+            session.context.username(), message.toString(), instag, session);
         if (msgout) {
             //frag policy something other than SEND_ALL.. results in a fragment to be sent manually
-            this.emit("inject_message", msgout);
+            nextTick(function () {
+                session.emit("inject_message", msgout);
+            });
         }
     };
 
     Session.prototype.recv = function (message) {
+        var session = this;
+
         //message can be any object that can be serialsed to a string using it's .toString() method.
-        var msg = this.ops.messageReceiving(this.user.state, this.context.accountname(), this.context.protocol(),
-            this.context.username(), message.toString(), this);
+        var msg = session.ops.messageReceiving(session.user.state, session.context.accountname(),
+            session.context
+            .protocol(),
+            session.context.username(), message.toString(), session);
         if (msg) {
-            this.emit("message", msg, this.isEncrypted());
+            nextTick(function () {
+                session.emit("message", msg, session.isEncrypted());
+            });
         }
     };
 
-    Session.prototype.close = function () {
-        if (this.message_poll_interval) {
-            clearInterval(this.message_poll_interval);
-        }
-        this.ops.disconnect(this.user.state, this.context.accountname(), this.context.protocol(), this.context.username(),
-            this.context.their_instance());
-        this.emit("shutdown");
+    Session.prototype.end = function () {
+        var session = this;
+        nextTick(function () {
+            if (session.message_poll_interval) {
+                clearInterval(session.message_poll_interval);
+            }
+            session.ops.disconnect(session.user.state, session.context.accountname(), session.context.protocol(),
+                session.context.username(),
+                session.context.their_instance());
+            session.emit("shutdown");
+        });
     };
 
     Session.prototype.start_smp = function (secret) {

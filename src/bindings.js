@@ -21,7 +21,7 @@
      */
 
     var root = this,
-        Module, ASYNC, fs, path, BigInt;
+        Module, ASYNC, fs, path, BigInt, nextTick;
 
     if (typeof exports !== 'undefined') {
         Module = require("../build/libotr4.js");
@@ -34,6 +34,7 @@
             path.sep = (process.platform.indexOf("win") === 0) ? "\\" : "/";
         }
         module.exports = OTRBindings;
+        nextTick = process.nextTick;
 
     } else {
         Module = root.libotr4Module;
@@ -41,6 +42,9 @@
         fs = undefined; //local storage?
         BigInt = root.BigInt;
         root.OTRBindings = OTRBindings;
+        nextTick = function (func) {
+            setTimeout(func, 0);
+        };
     }
 
 
@@ -528,7 +532,9 @@
     function ops_handle_event(O, callback) {
         var instance = O._;
         delete O._;
-        instance._event_handler(O);
+        nextTick(function () {
+            instance._event_handler(O);
+        });
         callback();
     }
 
@@ -539,9 +545,7 @@
         var ret_value;
 
         //handle ops synchronously
-        ['is_logged_in', 'policy', 'max_message_size', 'create_instag', 'create_privkey', 'new_fingerprint',
-            'write_fingerprints'
-        ].forEach(function (E) {
+        ['is_logged_in', 'policy', 'max_message_size', 'create_instag', 'create_privkey'].forEach(function (E) {
             if (ev_name == E) {
                 event_handled = true;
                 ret_value = MAO[$index].instance._event_handler(ev_obj);
