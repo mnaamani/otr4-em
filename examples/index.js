@@ -209,10 +209,10 @@ session_b.on("smp", function (type) {
     debug("Received SMP Request.");
     if (!SEND_BAD_SECRET) {
         debug("responding with correct secret");
-        this.respond_smp('s3cr37');
+        this.smpRespond('s3cr37');
     } else {
         debug("responding with wrong secret");
-        this.respond_smp("!!wrong_secret!!");
+        this.smpRespond("!!wrong_secret!!");
     }
 });
 
@@ -240,7 +240,7 @@ var loop = setInterval(function () {
             SMP_TEST_IN_PROGRESS = true;
             SMP_TEST_PERFORMED = true;
             debug("Starting SMP Test");
-            session_a.start_smp();
+            session_a.smpStart();
         } else {
             debug("Skipping SMP Test buddies previously authenticated");
             SMP_TEST_DONE = true;

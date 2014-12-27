@@ -414,7 +414,7 @@
         });
     };
 
-    Session.prototype.start_smp = function (secret) {
+    Session.prototype.smpStart = function (secret) {
         var sec = secret;
         sec = sec || (this.parameters ? this.parameters.secret : undefined);
         if (sec) {
@@ -424,7 +424,7 @@
         }
     };
 
-    Session.prototype.start_smp_question = function (question, secret) {
+    Session.prototype.smpStartQuestion = function (question, secret) {
         if (!question) {
             throw (new Error("No Question Provided"));
         }
@@ -442,7 +442,7 @@
         this.ops.initSMP(this.user.state, this.context, sec, question);
     };
 
-    Session.prototype.respond_smp = function (secret) {
+    Session.prototype.smpRespond = function (secret) {
         var sec = secret || undefined;
         if (!sec) {
             sec = this.parameters || undefined;
@@ -453,7 +453,7 @@
         this.ops.respondSMP(this.user.state, this.context, sec);
     };
 
-    Session.prototype.abort_smp = function () {
+    Session.prototype.smpAbort = function () {
         this.ops.abortSMP(this.user.state, this.context);
     };
 
@@ -469,28 +469,20 @@
         return this.ops.extraSymKey(this.user.state, this.context, use, usedata);
     };
 
-    /*TODO: add the following methods, since we dont have direct access to the
-            context object anymore.
+    Session.prototype.theirInstance = function () {
+        return this.context.their_instance();
+    };
 
-    **context.their_instance()**
+    Session.prototype.ourInstance = function () {
+        return this.context.our_instance();
+    };
 
-    returns number: instance tag of buddy
+    Session.prototype.protocolVersion = function () {
+        return this.context.protocol_version();
+    };
 
-    **context.our_instance()**
-
-    returns number: our instance tag
-
-    **context.protocol_version()**
-
-    return number: otr protocol version in use, eg. 3
-
-    **context.fingerprint()**
-
-    return string: fingerprint of buddy in an active Session()
-    */
-
-    Session.prototype.getContext = function () {
-        return this.context;
+    Session.prototype.theirFingerprint = function () {
+        return this.context.fingerprint();
     };
 
     //add a simple events API for use in the browser
