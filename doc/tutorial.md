@@ -1,14 +1,7 @@
-### OTR4-em - Tutorial
-
-### Foreward.
-Where OTR fits into the network communication stack....
-
-
-#### Using the module in node
+#### Using the otr4-em module in node
 
     var otr = require("otr4-em")
       , version = otr.version(); // "4.1.0-emscripten"
-
 
 
 First thing we need is to load the account data.
@@ -98,7 +91,7 @@ Now that we have created an account and our OTR key, we can chat with remote par
 
     var bob = account.contact("Bob");
 
-Once we have a Contact object we can begin an OTR conversation, using the **openSession** method of the contact:
+Once we have a Contact object we can setup an OTR conversation, using the **openSession** method of the contact:
 
     var session = bob.openSession();
 
@@ -119,7 +112,7 @@ when receiving data from the network pass it into the session's recv method
         session.recv(data);
     });
 
-when a session emits the inject_message with a message fragment send it to the remote end
+when a session emits the inject_message with a message fragment send it to the remote end:
 
     session.on("inject_message",function(fragment){
         client.write(fragment);
@@ -164,8 +157,16 @@ At anytime during a secure session we can perform authentication using the Socia
 
 You may receive an smp event and respond:
 
-    session.on("smp",function(type){
-        if(type == "request"){
-            session.smpRespond("shared-secret");
+    session.on("smp", function(type) {
+        switch (type) {
+            case "request":
+                session.smpRespond("shared-secret");
+                break;
+
+            case "complete":
+                console.log("SMP successful");
+                break;
         }
     });
+
+on successful SMP authentication the smp "complete" event will be emitted.
