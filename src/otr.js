@@ -413,7 +413,7 @@
             session.ops.disconnect(session.user.state, session.context.accountname(), session.context.protocol(),
                 session.context.username(),
                 session.context.their_instance());
-            session.emit("shutdown");
+            session.emit("end");
         });
     };
 
@@ -577,7 +577,7 @@
                 emit(o.EVENT, o.use, o.usedata, o.key);
                 return;
             case "remote_disconnected":
-                return emit(o.EVENT);
+                return emit("end");
             case "update_context_list": //raise this event on user object instead of session?
                 emit(o.EVENT);
                 return;
