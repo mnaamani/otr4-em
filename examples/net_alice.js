@@ -6,27 +6,13 @@ var user = new otr.User(),
     contact = account.contact("bob");
 
 var server = net.createServer(function (conn) {
+    conn.pause(); //allow time to setup all event handlers
 
     var session = contact.openSession();
 
-    conn.on("end", function () {
-        console.log("closing connection");
-    });
-
-    session.on("inject_message", function (fragment) {
-        if (conn) {
-            try {
-                conn.write(fragment);
-            } catch (e) {}
-        }
-    });
-
-    conn.on("data", function (data) {
-        session.recv(data);
-    });
-
-    session.on("remote_disconnected", function () {
-        console.log("remote_disconnected");
+    session.on("disconnect", function () {
+        console.log("remote side ended secure session.");
+        session.end(); //return to plain text
         conn.end();
     });
 
@@ -47,6 +33,22 @@ var server = net.createServer(function (conn) {
         session.send(message); //echo back message.
     });
 
+    session.on("inject_message", function (fragment) {
+        try {
+            conn.write(fragment);
+        } catch (e) {}
+    });
+
+    conn.on("end", function () {
+        console.log("closing connection");
+        session.end();
+    });
+
+    conn.on("data", function (data) {
+        session.recv(data);
+    });
+
+    conn.resume(); //start emitting data events
 });
 
 

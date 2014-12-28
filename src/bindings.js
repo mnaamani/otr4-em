@@ -21,7 +21,7 @@
      */
 
     var root = this,
-        Module, ASYNC, fs, path, BigInt, nextTick;
+        Module, ASYNC, fs, path, BigInt;
 
     if (typeof exports !== 'undefined') {
         Module = require("../build/libotr4.js");
@@ -34,7 +34,6 @@
             path.sep = (process.platform.indexOf("win") === 0) ? "\\" : "/";
         }
         module.exports = OTRBindings;
-        nextTick = process.nextTick;
 
     } else {
         Module = root.libotr4Module;
@@ -42,9 +41,6 @@
         fs = undefined; //local storage?
         BigInt = root.BigInt;
         root.OTRBindings = OTRBindings;
-        nextTick = function (func) {
-            setTimeout(func, 0);
-        };
     }
 
 
@@ -532,9 +528,7 @@
     function ops_handle_event(O, callback) {
         var instance = O._;
         delete O._;
-        nextTick(function () {
-            instance._event_handler(O);
-        });
+        instance._event_handler(O);
         callback();
     }
 

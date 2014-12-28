@@ -163,10 +163,9 @@ session_b.on("message", function (msg, encrypted) {
     this.send("got your message '" + msg + "'");
 });
 
-session_a.on("remote_disconnected", function () {
+session_a.on("disconnect", function () {
     debug("Session was closed remotely");
     exit_test("", true);
-
 });
 
 session_b.on("received_symkey", function (use, usedata, key) {

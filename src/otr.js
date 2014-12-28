@@ -121,7 +121,9 @@
             MSGEVENT: MSGEVENT
         };
 
-        nextTick = process.nextTick;
+        nextTick = function (func) {
+            setTimeout(func, 0);
+        };
 
     } else {
         inBrowser = true;
@@ -374,34 +376,32 @@
 
     Session.prototype.send = function (message, instag) {
         var session = this;
-
-        instag = instag || 1; //default instag = BEST
-        //message can be any object that can be serialsed to a string using it's .toString() method.
-        var msgout = session.ops.messageSending(session.user.state, session.context.accountname(),
-            session.context
-            .protocol(),
-            session.context.username(), message.toString(), instag, session);
-        if (msgout) {
-            //frag policy something other than SEND_ALL.. results in a fragment to be sent manually
-            nextTick(function () {
+        nextTick(function () {
+            instag = instag || 1; //default instag = BEST
+            //message can be any object that can be serialsed to a string using it's .toString() method.
+            var msgout = session.ops.messageSending(session.user.state, session.context.accountname(),
+                session.context
+                .protocol(),
+                session.context.username(), message.toString(), instag, session);
+            if (msgout) {
+                //frag policy something other than SEND_ALL.. results in a fragment to be sent manually
                 session.emit("inject_message", msgout);
-            });
-        }
+            }
+        });
     };
 
     Session.prototype.recv = function (message) {
         var session = this;
-
-        //message can be any object that can be serialsed to a string using it's .toString() method.
-        var msg = session.ops.messageReceiving(session.user.state, session.context.accountname(),
-            session.context
-            .protocol(),
-            session.context.username(), message.toString(), session);
-        if (msg) {
-            nextTick(function () {
+        nextTick(function () {
+            //message can be any object that can be serialsed to a string using it's .toString() method.
+            var msg = session.ops.messageReceiving(session.user.state, session.context.accountname(),
+                session.context
+                .protocol(),
+                session.context.username(), message.toString(), session);
+            if (msg) {
                 session.emit("message", msg, session.isEncrypted());
-            });
-        }
+            }
+        });
     };
 
     Session.prototype.end = function () {
@@ -413,21 +413,27 @@
             session.ops.disconnect(session.user.state, session.context.accountname(), session.context.protocol(),
                 session.context.username(),
                 session.context.their_instance());
-            session.emit("end");
+            nextTick(function () {
+                session.emit("plaintext");
+            });
         });
     };
 
     Session.prototype.smpStart = function (secret) {
+        var session = this;
         var sec = secret;
         sec = sec || (this.parameters ? this.parameters.secret : undefined);
         if (sec) {
-            this.ops.initSMP(this.user.state, this.context, sec);
+            nextTick(function () {
+                session.ops.initSMP(session.user.state, session.context, sec);
+            });
         } else {
             throw (new Error("No Secret Provided"));
         }
     };
 
     Session.prototype.smpStartQuestion = function (question, secret) {
+        var session = this;
         if (!question) {
             throw (new Error("No Question Provided"));
         }
@@ -442,10 +448,13 @@
         if (!sec) {
             throw (new Error("No Secret Matched for Question"));
         }
-        this.ops.initSMP(this.user.state, this.context, sec, question);
+        nextTick(function () {
+            session.ops.initSMP(session.user.state, session.context, sec, question);
+        });
     };
 
     Session.prototype.smpRespond = function (secret) {
+        var session = this;
         var sec = secret || undefined;
         if (!sec) {
             sec = this.parameters || undefined;
@@ -453,11 +462,16 @@
         if (!sec) {
             throw (new Error("No Secret Provided"));
         }
-        this.ops.respondSMP(this.user.state, this.context, sec);
+        nextTick(function () {
+            session.ops.respondSMP(session.user.state, session.context, sec);
+        });
     };
 
     Session.prototype.smpAbort = function () {
-        this.ops.abortSMP(this.user.state, this.context);
+        var session = this;
+        nextTick(function () {
+            session.ops.abortSMP(session.user.state, session.context);
+        });
     };
 
     Session.prototype.isEncrypted = function () {
@@ -487,6 +501,11 @@
     Session.prototype.theirFingerprint = function () {
         return this.context.fingerprint();
     };
+
+    //TODO - Session: add a destroy method
+
+    //TODO - add removeAllListeners method for event emitter, and use it when destroying
+    //a session
 
     //add a simple events API for use in the browser
     if (!Session.prototype.on) {
@@ -577,7 +596,7 @@
                 emit(o.EVENT, o.use, o.usedata, o.key);
                 return;
             case "remote_disconnected":
-                return emit("end");
+                return emit("disconnect");
             case "update_context_list": //raise this event on user object instead of session?
                 emit(o.EVENT);
                 return;
