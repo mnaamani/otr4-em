@@ -22,7 +22,7 @@
     var root = this,
         otr, OTRBindings, util, events, nextTick;
 
-    var USER_HOME = process.env[(process.platform == 'win32') ? 'USERPROFILE' : 'HOME'];
+    var inBrowser = false;
 
     /** The available values used for the policy parameter of an otr Session()
      *
@@ -124,6 +124,7 @@
         nextTick = process.nextTick;
 
     } else {
+        inBrowser = true;
         OTRBindings = root.OTRBindings;
         events = undefined;
         otr = new OTRBindings();
@@ -181,6 +182,8 @@
     }
 
     function expandHomeDir(path) {
+        if (inBrowser) return path;
+        var USER_HOME = process.env[(process.platform == 'win32') ? 'USERPROFILE' : 'HOME'];
         if (path && path[0] === '~') {
             //expand home directory
             return path.replace("~", USER_HOME);
