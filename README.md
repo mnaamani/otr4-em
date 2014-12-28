@@ -6,7 +6,8 @@ You can install the module directly from npm registry:
 
     npm install otr4-em
 
-Read the [API Documentation](https://github.com/mnaamani/otr4-em/blob/master/doc/API.md)
+A short [tutorial](https://github.com/mnaamani/otr4-em/blob/master/doc/API.md) is available.
+Full API docs will be available soon.
 
 Example Use:
 - [node](https://github.com/mnaamani/otr4-em/blob/master/examples/index.js)
