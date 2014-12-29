@@ -502,10 +502,14 @@
         return this.context.fingerprint();
     };
 
-    //TODO - Session: add a destroy method
-
-    //TODO - add removeAllListeners method for event emitter, and use it when destroying
-    //a session
+    Session.prototype.destroy = function () {
+        var session = this;
+        if (session.message_poll_interval) {
+            clearInterval(session.message_poll_interval);
+        }
+        session.removeAllListeners();
+        session.end();
+    };
 
     //add a simple events API for use in the browser
     if (!Session.prototype.on) {
@@ -517,6 +521,16 @@
             } else {
                 this._events[e] = [cb];
             }
+            return this;
+        };
+    }
+
+    if (!Session.prototype.listeners) {
+        Session.prototype.listeners = function (e) {
+            if (this._events[e]) {
+                return this._events[e];
+            }
+            return [];
         };
     }
 
@@ -526,11 +540,28 @@
             //'apply' event handler function  to 'this' channel pass eventname 'e' and arguemnts.slice(1)
             var self = this;
             var args = Array.prototype.slice.call(arguments);
+            var listeners_count = 0;
             if (this._events && this._events[e]) {
+                listeners_count = this._events[e].length;
                 this._events[e].forEach(function (cb) {
                     cb.apply(self, args.length > 1 ? args.slice(1) : [undefined]);
                 });
+                if (listeners_count > 0) return true;
             }
+            return false;
+        };
+    }
+
+    if (!Session.prototype.removeAllListeners) {
+        Session.prototype.removeAllListeners = function (e) {
+            if (e) {
+                if (this._events[e]) {
+                    this._events[e] = [];
+                }
+            } else {
+                this._events = {};
+            }
+            return this;
         };
     }
 
@@ -557,8 +588,11 @@
                 emit("smp", "aborted");
                 return;
             case "is_logged_in":
-                //remote party is always assumed to be online
-                return 1;
+                if (typeof otrSession.online === 'function') {
+                    if (otrSession.online()) return 1;
+                    return 0;
+                }
+                return 1; //remote party is assumed to be online
             case "gone_secure":
                 emit(o.EVENT);
                 return;

@@ -14,6 +14,14 @@ console.log("connecting...");
 var conn = new net.Socket();
 var session = contact.openSession();
 
+session.online = function () {
+    console.log("checking if contact is online..");
+    if (conn && conn.remotePort) {
+        return true;
+    }
+    return false;
+};
+
 session.on("inject_message", function (fragment) {
     try {
         conn.write(fragment);

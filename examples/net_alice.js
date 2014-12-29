@@ -10,10 +10,18 @@ var server = net.createServer(function (conn) {
 
     var session = contact.openSession();
 
+    session.online = function () {
+        console.log("checking if contact is online..");
+        if (conn && conn.remotePort) {
+            return true;
+        }
+        return false;
+    };
+
     session.on("disconnect", function () {
         console.log("remote side ended secure session.");
         session.end(); //return to plain text
-        conn.end();
+        //conn.end();
     });
 
     session.on("new_fingerprint", function (fingerprint) {
@@ -41,7 +49,7 @@ var server = net.createServer(function (conn) {
 
     conn.on("end", function () {
         console.log("closing connection");
-        session.end();
+        session.destroy();
     });
 
     conn.on("data", function (data) {
