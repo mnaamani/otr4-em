@@ -478,6 +478,14 @@
         return (this.context.msgstate() === 1);
     };
 
+    Session.prototype.isPlaintext = function () {
+        return (this.context.msgstate() === 0);
+    };
+
+    Session.prototype.isFinished = function () {
+        return (this.context.msgstate() === 2);
+    };
+
     Session.prototype.isAuthenticated = function () {
         return (this.context.trust() === "smp");
     };
