@@ -399,7 +399,7 @@
             });
         };
         this.deleteKey = function () {
-            this.state.deleteKeyOnFile(user.keys, accountname, protocol);
+            user.state.deleteKeyOnFile(user.keys, accountname, protocol);
         };
         this.key = function () {
             return user.state.findKey(accountname, protocol);
