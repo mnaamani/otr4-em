@@ -117,6 +117,9 @@
              */
             version: otr.version,
             User: User,
+            Account: Account,
+            Contact: Contact,
+            Session: Session,
             POLICY: POLICY,
             MSGEVENT: MSGEVENT
         };
@@ -136,6 +139,9 @@
             root.OTR = {
                 version: otr.version,
                 User: User,
+                Account: Account,
+                Contact: Contact,
+                Session: Session,
                 POLICY: POLICY,
                 MSGEVENT: MSGEVENT
             };
@@ -382,6 +388,9 @@
     /** Represents a single user account.
      * @alias module:otr.Account
      * @constructor
+     * @argument {User} user - {@link module:otr.User User} object to associate the account with
+     * @argument {string} accountname
+     * @argument {string} protocol
      */
     function Account(user, accountname, protocol) {
         var account = this;
@@ -427,7 +436,7 @@
             return user.state.findInstag(accountname, protocol);
         };
         this.contact = function (recipient) {
-            return new Contact(user, accountname, protocol, recipient);
+            return new Contact(user, account, recipient);
         };
         this.contacts = function () {
             var contexts = user.state.masterContexts(),
@@ -436,27 +445,26 @@
                 if (context.their_instance() !== 0) {
                     return;
                 }
-                contacts.push(new Contact(user, accountname, protocol, context.username()));
+                contacts.push(new Contact(user, account, context.username()));
             });
             return contacts;
         };
     }
 
-    function Contact(user, accountname, protocol, recipient) {
-        var context = new otr.ConnContext(user.state, accountname, protocol, recipient);
+    function Contact(user, account, recipient) {
+        var context = new otr.ConnContext(user.state, account.name(), account.protocol(), recipient);
         this.name = function () {
             return recipient;
         };
         this.openSession = function (parameters) {
-            return new Session(user, new otr.ConnContext(user.state, accountname, protocol, recipient),
-                parameters);
+            return new Session(user, account, this, parameters);
         };
         this.fingerprints = function () {
             return context.masterFingerprints();
         };
     }
 
-    function Session(user, context, parameters) {
+    function Session(user, account, contact, parameters) {
         var session = this;
         if (events) {
             events.EventEmitter.call(this);
@@ -464,7 +472,7 @@
             this._events = {};
         }
         this.user = user;
-        this.context = context;
+        this.context = new otr.ConnContext(user.state, account.name(), account.protocol(), contact.name());
         this.parameters = parameters;
         this.ops = new otr.MessageAppOps(otrEventHandler(session));
         this.message_poll_interval = setInterval(function () {
