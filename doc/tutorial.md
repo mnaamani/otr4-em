@@ -170,3 +170,6 @@ You may receive an smp event and respond:
     });
 
 on successful SMP authentication the smp "complete" event will be emitted.
+
+### API documentation
+See the full [API docs](http://www.mokhtar.net/projects/otr4-em/docs/) for more detailed documentation.
