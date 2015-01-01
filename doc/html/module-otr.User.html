@@ -57,7 +57,7 @@
     
     <div class="description">
         Represents a users's keys, fingerprints and instance tags
- stored in files on the virtual file system. Passing in the optional files argument
+ stored in files on the virtual file system. Passing in the optional files argument to
  the constructor will load the the keystore files (keys, fingerprints and instags) automatically, using
  the loadKeysFromFS, loadFingerprintsFromFS and loadInstagsFromFS methods.
     </div>
@@ -338,7 +338,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="otr.js.html">otr.js</a>, <a href="otr.js.html#line384">line 384</a>
+        <a href="otr.js.html">otr.js</a>, <a href="otr.js.html#line412">line 412</a>
     </li></ul></dd>
     
 
@@ -402,7 +402,7 @@
 
     
     <div class="description">
-        Returns and array of <a href="module-otr.Account.html">Account</a> elements, representing all the user accounts.
+        Returns and array of <a href="module-otr.Account.html">Account</a> instances, representing all the user accounts.
 If no accounts exist, the return value will be an empty array.
     </div>
     
@@ -447,7 +447,7 @@ If no accounts exist, the return value will be an empty array.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="otr.js.html">otr.js</a>, <a href="otr.js.html#line339">line 339</a>
+        <a href="otr.js.html">otr.js</a>, <a href="otr.js.html#line363">line 363</a>
     </li></ul></dd>
     
 
@@ -474,7 +474,7 @@ If no accounts exist, the return value will be an empty array.
     
             
 <div class="param-desc">
-    Array of <a href="module-otr.Account.html">Account</a> elements.
+    Array of <a href="module-otr.Account.html">Account</a> instances.
 </div>
 
 
@@ -556,7 +556,7 @@ environment for persisting the account data.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="otr.js.html">otr.js</a>, <a href="otr.js.html#line289">line 289</a>
+        <a href="otr.js.html">otr.js</a>, <a href="otr.js.html#line305">line 305</a>
     </li></ul></dd>
     
 
@@ -577,6 +577,34 @@ environment for persisting the account data.
     
 
     
+    <h5>Throws:</h5>
+    <ul>
+            <li>
+
+    <div class="param-desc">
+    
+        
+<span class="param-type">Error</span>
+
+
+    
+    </div>
+
+</li>
+        
+            <li>
+
+    <div class="param-desc">
+    
+        
+<span class="param-type">TypeError</span>
+
+
+    
+    </div>
+
+</li>
+        </ul>
 
     
     <h5>Returns:</h5>
@@ -661,7 +689,7 @@ environment for persisting the account data.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="otr.js.html">otr.js</a>, <a href="otr.js.html#line299">line 299</a>
+        <a href="otr.js.html">otr.js</a>, <a href="otr.js.html#line317">line 317</a>
     </li></ul></dd>
     
 
@@ -682,6 +710,34 @@ environment for persisting the account data.
     
 
     
+    <h5>Throws:</h5>
+    <ul>
+            <li>
+
+    <div class="param-desc">
+    
+        
+<span class="param-type">Error</span>
+
+
+    
+    </div>
+
+</li>
+        
+            <li>
+
+    <div class="param-desc">
+    
+        
+<span class="param-type">TypeError</span>
+
+
+    
+    </div>
+
+</li>
+        </ul>
 
     
     <h5>Returns:</h5>
@@ -766,7 +822,7 @@ environment for persisting the account data.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="otr.js.html">otr.js</a>, <a href="otr.js.html#line279">line 279</a>
+        <a href="otr.js.html">otr.js</a>, <a href="otr.js.html#line293">line 293</a>
     </li></ul></dd>
     
 
@@ -787,6 +843,34 @@ environment for persisting the account data.
     
 
     
+    <h5>Throws:</h5>
+    <ul>
+            <li>
+
+    <div class="param-desc">
+    
+        
+<span class="param-type">Error</span>
+
+
+    
+    </div>
+
+</li>
+        
+            <li>
+
+    <div class="param-desc">
+    
+        
+<span class="param-type">TypeError</span>
+
+
+    
+    </div>
+
+</li>
+        </ul>
 
     
     <h5>Returns:</h5>
@@ -827,7 +911,7 @@ environment for persisting the account data.
     
     <div class="description">
         Reads a file from filesystem, imports it into the the internal virtual file system and
-parses it to load fingerprints. Can only be called once.
+parses it to load fingerprints.
     </div>
     
 
@@ -964,7 +1048,7 @@ parses it to load fingerprints. Can only be called once.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="otr.js.html">otr.js</a>, <a href="otr.js.html#line225">line 225</a>
+        <a href="otr.js.html">otr.js</a>, <a href="otr.js.html#line229">line 229</a>
     </li></ul></dd>
     
 
@@ -985,6 +1069,34 @@ parses it to load fingerprints. Can only be called once.
     
 
     
+    <h5>Throws:</h5>
+    <ul>
+            <li>
+
+    <div class="param-desc">
+    
+        
+<span class="param-type">Error</span>
+
+
+    
+    </div>
+
+</li>
+        
+            <li>
+
+    <div class="param-desc">
+    
+        
+<span class="param-type">TypeError</span>
+
+
+    
+    </div>
+
+</li>
+        </ul>
 
     
 
@@ -1007,7 +1119,7 @@ parses it to load fingerprints. Can only be called once.
     
     <div class="description">
         Reads a file from filesystem, imports it into the the internal virtual file system and
-parses it to load instags. Can only be called once.
+parses it to load instags.
     </div>
     
 
@@ -1144,7 +1256,7 @@ parses it to load instags. Can only be called once.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="otr.js.html">otr.js</a>, <a href="otr.js.html#line238">line 238</a>
+        <a href="otr.js.html">otr.js</a>, <a href="otr.js.html#line244">line 244</a>
     </li></ul></dd>
     
 
@@ -1165,6 +1277,34 @@ parses it to load instags. Can only be called once.
     
 
     
+    <h5>Throws:</h5>
+    <ul>
+            <li>
+
+    <div class="param-desc">
+    
+        
+<span class="param-type">Error</span>
+
+
+    
+    </div>
+
+</li>
+        
+            <li>
+
+    <div class="param-desc">
+    
+        
+<span class="param-type">TypeError</span>
+
+
+    
+    </div>
+
+</li>
+        </ul>
 
     
 
@@ -1187,7 +1327,7 @@ parses it to load instags. Can only be called once.
     
     <div class="description">
         Reads a file from filesystem, imports it into the the internal virtual file system and
-parses it to load private keys. Can only be called once.
+parses it to load private keys.
     </div>
     
 
@@ -1324,7 +1464,7 @@ parses it to load private keys. Can only be called once.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="otr.js.html">otr.js</a>, <a href="otr.js.html#line212">line 212</a>
+        <a href="otr.js.html">otr.js</a>, <a href="otr.js.html#line214">line 214</a>
     </li></ul></dd>
     
 
@@ -1345,6 +1485,34 @@ parses it to load private keys. Can only be called once.
     
 
     
+    <h5>Throws:</h5>
+    <ul>
+            <li>
+
+    <div class="param-desc">
+    
+        
+<span class="param-type">Error</span>
+
+
+    
+    </div>
+
+</li>
+        
+            <li>
+
+    <div class="param-desc">
+    
+        
+<span class="param-type">TypeError</span>
+
+
+    
+    </div>
+
+</li>
+        </ul>
 
     
 
@@ -1502,7 +1670,7 @@ parses it to load private keys. Can only be called once.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="otr.js.html">otr.js</a>, <a href="otr.js.html#line259">line 259</a>
+        <a href="otr.js.html">otr.js</a>, <a href="otr.js.html#line269">line 269</a>
     </li></ul></dd>
     
 
@@ -1523,6 +1691,34 @@ parses it to load private keys. Can only be called once.
     
 
     
+    <h5>Throws:</h5>
+    <ul>
+            <li>
+
+    <div class="param-desc">
+    
+        
+<span class="param-type">Error</span>
+
+
+    
+    </div>
+
+</li>
+        
+            <li>
+
+    <div class="param-desc">
+    
+        
+<span class="param-type">TypeError</span>
+
+
+    
+    </div>
+
+</li>
+        </ul>
 
     
 
@@ -1680,7 +1876,7 @@ parses it to load private keys. Can only be called once.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="otr.js.html">otr.js</a>, <a href="otr.js.html#line269">line 269</a>
+        <a href="otr.js.html">otr.js</a>, <a href="otr.js.html#line281">line 281</a>
     </li></ul></dd>
     
 
@@ -1701,6 +1897,34 @@ parses it to load private keys. Can only be called once.
     
 
     
+    <h5>Throws:</h5>
+    <ul>
+            <li>
+
+    <div class="param-desc">
+    
+        
+<span class="param-type">Error</span>
+
+
+    
+    </div>
+
+</li>
+        
+            <li>
+
+    <div class="param-desc">
+    
+        
+<span class="param-type">TypeError</span>
+
+
+    
+    </div>
+
+</li>
+        </ul>
 
     
 
@@ -1858,7 +2082,7 @@ parses it to load private keys. Can only be called once.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="otr.js.html">otr.js</a>, <a href="otr.js.html#line249">line 249</a>
+        <a href="otr.js.html">otr.js</a>, <a href="otr.js.html#line257">line 257</a>
     </li></ul></dd>
     
 
@@ -1879,6 +2103,34 @@ parses it to load private keys. Can only be called once.
     
 
     
+    <h5>Throws:</h5>
+    <ul>
+            <li>
+
+    <div class="param-desc">
+    
+        
+<span class="param-type">Error</span>
+
+
+    
+    </div>
+
+</li>
+        
+            <li>
+
+    <div class="param-desc">
+    
+        
+<span class="param-type">TypeError</span>
+
+
+    
+    </div>
+
+</li>
+        </ul>
 
     
 
@@ -1900,7 +2152,7 @@ parses it to load private keys. Can only be called once.
 
     
     <div class="description">
-        Creates the fingerprints file on the virtual file system from a string. Can only be called once.
+        Creates the fingerprints file on the virtual file system from a string.
     </div>
     
 
@@ -1992,7 +2244,7 @@ parses it to load private keys. Can only be called once.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="otr.js.html">otr.js</a>, <a href="otr.js.html#line318">line 318</a>
+        <a href="otr.js.html">otr.js</a>, <a href="otr.js.html#line340">line 340</a>
     </li></ul></dd>
     
 
@@ -2013,6 +2265,34 @@ parses it to load private keys. Can only be called once.
     
 
     
+    <h5>Throws:</h5>
+    <ul>
+            <li>
+
+    <div class="param-desc">
+    
+        
+<span class="param-type">Error</span>
+
+
+    
+    </div>
+
+</li>
+        
+            <li>
+
+    <div class="param-desc">
+    
+        
+<span class="param-type">TypeError</span>
+
+
+    
+    </div>
+
+</li>
+        </ul>
 
     
 
@@ -2034,7 +2314,7 @@ parses it to load private keys. Can only be called once.
 
     
     <div class="description">
-        Creates the instags file on the virtual file system from a string. Can only be called once.
+        Creates the instags file on the virtual file system from a string.
     </div>
     
 
@@ -2126,7 +2406,7 @@ parses it to load private keys. Can only be called once.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="otr.js.html">otr.js</a>, <a href="otr.js.html#line328">line 328</a>
+        <a href="otr.js.html">otr.js</a>, <a href="otr.js.html#line352">line 352</a>
     </li></ul></dd>
     
 
@@ -2147,6 +2427,34 @@ parses it to load private keys. Can only be called once.
     
 
     
+    <h5>Throws:</h5>
+    <ul>
+            <li>
+
+    <div class="param-desc">
+    
+        
+<span class="param-type">Error</span>
+
+
+    
+    </div>
+
+</li>
+        
+            <li>
+
+    <div class="param-desc">
+    
+        
+<span class="param-type">TypeError</span>
+
+
+    
+    </div>
+
+</li>
+        </ul>
 
     
 
@@ -2168,7 +2476,7 @@ parses it to load private keys. Can only be called once.
 
     
     <div class="description">
-        Creates the keys file on the virtual file system from a string. Can only be called once.
+        Creates the keys file on the virtual file system from a string.
     </div>
     
 
@@ -2260,7 +2568,7 @@ parses it to load private keys. Can only be called once.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="otr.js.html">otr.js</a>, <a href="otr.js.html#line308">line 308</a>
+        <a href="otr.js.html">otr.js</a>, <a href="otr.js.html#line328">line 328</a>
     </li></ul></dd>
     
 
@@ -2281,6 +2589,34 @@ parses it to load private keys. Can only be called once.
     
 
     
+    <h5>Throws:</h5>
+    <ul>
+            <li>
+
+    <div class="param-desc">
+    
+        
+<span class="param-type">Error</span>
+
+
+    
+    </div>
+
+</li>
+        
+            <li>
+
+    <div class="param-desc">
+    
+        
+<span class="param-type">TypeError</span>
+
+
+    
+    </div>
+
+</li>
+        </ul>
 
     
 
@@ -2348,7 +2684,7 @@ real file system or elswehere using fingerprintsToString or saveFingerprintsToFS
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="otr.js.html">otr.js</a>, <a href="otr.js.html#line355">line 355</a>
+        <a href="otr.js.html">otr.js</a>, <a href="otr.js.html#line381">line 381</a>
     </li></ul></dd>
     
 
@@ -2369,6 +2705,34 @@ real file system or elswehere using fingerprintsToString or saveFingerprintsToFS
     
 
     
+    <h5>Throws:</h5>
+    <ul>
+            <li>
+
+    <div class="param-desc">
+    
+        
+<span class="param-type">Error</span>
+
+
+    
+    </div>
+
+</li>
+        
+            <li>
+
+    <div class="param-desc">
+    
+        
+<span class="param-type">TypeError</span>
+
+
+    
+    </div>
+
+</li>
+        </ul>
 
     
 
@@ -2436,7 +2800,7 @@ or saveFingerprintsToFS methods.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="otr.js.html">otr.js</a>, <a href="otr.js.html#line365">line 365</a>
+        <a href="otr.js.html">otr.js</a>, <a href="otr.js.html#line393">line 393</a>
     </li></ul></dd>
     
 
@@ -2457,6 +2821,34 @@ or saveFingerprintsToFS methods.
     
 
     
+    <h5>Throws:</h5>
+    <ul>
+            <li>
+
+    <div class="param-desc">
+    
+        
+<span class="param-type">Error</span>
+
+
+    
+    </div>
+
+</li>
+        
+            <li>
+
+    <div class="param-desc">
+    
+        
+<span class="param-type">TypeError</span>
+
+
+    
+    </div>
+
+</li>
+        </ul>
 
     
 
@@ -2479,13 +2871,13 @@ or saveFingerprintsToFS methods.
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-otr.html">otr</a></li></ul><h3>Classes</h3><ul><li><a href="module-otr.Account.html">Account</a></li><li><a href="module-otr.User.html">User</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-otr.html">otr</a></li></ul><h3>Classes</h3><ul><li><a href="module-otr.Account.html">Account</a></li><li><a href="module-otr.Contact.html">Contact</a></li><li><a href="module-otr.Session.html">Session</a></li><li><a href="module-otr.User.html">User</a></li></ul><h3><a href="global.html">Global</a></h3>
 </nav>
 
 <br clear="both">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-alpha11</a> on Tue Dec 30 2014 18:45:14 GMT+0200 (EET)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-alpha11</a> on Thu Jan 01 2015 20:30:19 GMT+0200 (EET)
 </footer>
 
 <script> prettyPrint(); </script>
