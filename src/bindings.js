@@ -855,11 +855,10 @@
     }
 
     function GcryptError(num) {
-        this.num = num || 0;
-        this.message = gcry_.strerror(num || 0);
+        var err = new Error(gcry_.strerror(num || 0));
+        err.num = num || 0;
+        return err;
     }
-    GcryptError.prototype = new Error();
-    GcryptError.prototype.constructor = GcryptError;
 
 
 }).call();

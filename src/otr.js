@@ -152,7 +152,7 @@
     }
 
     /** Represents a users's keys, fingerprints and instance tags
-     *  stored in files on the virtual file system. Passing in the optional files argument
+     *  stored in files on the virtual file system. Passing in the optional files argument to
      *  the constructor will load the the keystore files (keys, fingerprints and instags) automatically, using
      *  the loadKeysFromFS, loadFingerprintsFromFS and loadInstagsFromFS methods.
      *  @alias module:otr.User
@@ -208,6 +208,8 @@
       * @param {Function} [transform] - function thats takes a Buffer as its only argument and returns a Buffer.
            The returned buffer will be stored in the imported file. (This could be used to decrypt a file, or transform it from a different format)
            If no function is provided the the file is imported as is.
+      * @throws {Error}
+      * @throws {TypeError}
       */
     User.prototype.loadKeysFromFS = function (filename, transform) {
         otr.VFS.importFile(expandHomeDir(filename), this.keys, transform);
@@ -221,6 +223,8 @@
     * @param {Function} [transform] - function thats takes a Buffer as its only argument and returns a Buffer.
     The returned buffer will be stored in the imported file. (This could be used to decrypt a file, or transform it from a different format)
     If no function is provided the the file is imported as is.
+    * @throws {Error}
+    * @throws {TypeError}
     */
     User.prototype.loadFingerprintsFromFS = function (filename, transform) {
         otr.VFS.importFile(expandHomeDir(filename), this.fingerprints, transform);
@@ -234,6 +238,8 @@
     * @param {Function} [transform] - function thats takes a Buffer as its only argument and returns a Buffer.
     The returned buffer will be stored in the imported file. (This could be used to decrypt a file, or transform it from a different format)
     If no function is provided the the file is imported as is.
+    * @throws {Error}
+    * @throws {TypeError}
     */
     User.prototype.loadInstagsFromFS = function (filename, transform) {
         otr.VFS.importFile(expandHomeDir(filename), this.instags, transform);
@@ -245,6 +251,8 @@
     * @param {string} filename - destination path to save private keys file.
     * @param {Function} [transform] - function thats takes a Buffer as its only argument and returns a Buffer.
     The returned buffer will be saved to the file system. (This could be used to encrypt a file, or transform it to a different format)
+    * @throws {Error}
+    * @throws {TypeError}
     */
     User.prototype.saveKeysToFS = function (filename, transform) {
         otr.VFS.exportFile(this.keys, expandHomeDir(filename), transform);
@@ -255,6 +263,8 @@
     * @param {string} filename - destination path to save fingerprints file.
     * @param {Function} [transform] - function thats takes a Buffer as its only argument and returns a Buffer.
     The returned buffer will be saved to the file system. (This could be used to encrypt a file, or transform it to a different format)
+    * @throws {Error}
+    * @throws {TypeError}
     */
     User.prototype.saveFingerprintsToFS = function (filename, transform) {
         otr.VFS.exportFile(this.fingerprints, expandHomeDir(filename), transform);
@@ -265,6 +275,8 @@
     * @param {string} filename - destination path to save instags file.
     * @param {Function} [transform] - function thats takes a Buffer as its only argument and returns a Buffer.
     The returned buffer will be saved to the file system. (This could be used to encrypt a file, or transform it to a different format)
+    * @throws {Error}
+    * @throws {TypeError}
     */
     User.prototype.saveInstagsToFS = function (filename, transform) {
         otr.VFS.exportFile(this.instags, expandHomeDir(filename), transform);
@@ -275,6 +287,8 @@
      * environment for persisting the account data.
      * @method
      * @returns {string}
+     * @throws {Error}
+     * @throws {TypeError}
      */
     User.prototype.keysToString = function () {
         return otr.VFS.readFileData(this.keys).toString();
@@ -285,6 +299,8 @@
      * environment for persisting the account data.
      * @method
      * @returns {string}
+     * @throws {Error}
+     * @throws {TypeError}
      */
     User.prototype.fingerprintsToString = function () {
         return otr.VFS.readFileData(this.fingerprints).toString();
@@ -295,6 +311,8 @@
      * environment for persisting the account data.
      * @method
      * @returns {string}
+     * @throws {Error}
+     * @throws {TypeError}
      */
     User.prototype.instagsToString = function () {
         return otr.VFS.readFileData(this.instags).toString();
@@ -304,6 +322,8 @@
      * Creates the keys file on the virtual file system from a string.
      * @method
      * @param {string} data - keys data in libotr format
+     * @throws {Error}
+     * @throws {TypeError}
      */
     User.prototype.stringToKeys = function (str) {
         otr.VFS.makeFile(this.keys, new Buffer(str));
@@ -314,6 +334,8 @@
      * Creates the fingerprints file on the virtual file system from a string.
      * @method
      * @param {string} data - fingerprints data in libotr format
+     * @throws {Error}
+     * @throws {TypeError}
      */
     User.prototype.stringToFingerprints = function (str) {
         otr.VFS.makeFile(this.fingerprints, new Buffer(str));
@@ -324,6 +346,8 @@
      * Creates the instags file on the virtual file system from a string.
      * @method
      * @param {string} data - instags data in libotr format
+     * @throws {Error}
+     * @throws {TypeError}
      */
     User.prototype.stringToInstags = function (str) {
         otr.VFS.makeFile(this.instags, new Buffer(str));
@@ -351,6 +375,8 @@
      * and when they get marked as trusted following SMP authentication. You will still need to persist the file to
      * real file system or elswehere using fingerprintsToString or saveFingerprintsToFS methods.
      * @method
+     * @throws {Error}
+     * @throws {TypeError}
      */
     User.prototype.writeFingerprints = function () {
         this.state.writeFingerprintsSync(this.fingerprints);
@@ -361,6 +387,8 @@
      * You will still need to persist the file to real file system or elswehere using fingerprintsToString
      * or saveFingerprintsToFS methods.
      * @method
+     * @throws {Error}
+     * @throws {TypeError}
      */
     User.prototype.writeTrustedFingerprints = function () {
         this.state.writeTrustedFingerprintsSync(this.fingerprints);
