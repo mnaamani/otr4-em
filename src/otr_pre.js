@@ -2,6 +2,7 @@ var Module;
 this["Module"] = Module = {
  'preRun': function(){
     Module["FS"]=FS;
+    Module["FS_destroyNode"]=FS.destroyNode;
     Module["FS_findObject"]=FS.findObject;
     Module["FS_readDataFile"]=function(path){
         var object = FS.findObject(path);

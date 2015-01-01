@@ -202,7 +202,7 @@
     }
 
     /** Reads a file from filesystem, imports it into the the internal virtual file system and
-      * parses it to load private keys. Can only be called once.
+      * parses it to load private keys.
       * @method
       * @param {string} filename - path to private keys file.
       * @param {Function} [transform] - function thats takes a Buffer as its only argument and returns a Buffer.
@@ -215,7 +215,7 @@
     };
 
     /** Reads a file from filesystem, imports it into the the internal virtual file system and
-    * parses it to load fingerprints. Can only be called once.
+    * parses it to load fingerprints.
     * @method
     * @param {string} filename - path to fingerprints file.
     * @param {Function} [transform] - function thats takes a Buffer as its only argument and returns a Buffer.
@@ -228,7 +228,7 @@
     };
 
     /** Reads a file from filesystem, imports it into the the internal virtual file system and
-    * parses it to load instags. Can only be called once.
+    * parses it to load instags.
     * @method
     * @param {string} filename - path to instags file.
     * @param {Function} [transform] - function thats takes a Buffer as its only argument and returns a Buffer.
@@ -301,7 +301,7 @@
     };
 
     /**
-     * Creates the keys file on the virtual file system from a string. Can only be called once.
+     * Creates the keys file on the virtual file system from a string.
      * @method
      * @param {string} data - keys data in libotr format
      */
@@ -311,7 +311,7 @@
     };
 
     /**
-     * Creates the fingerprints file on the virtual file system from a string. Can only be called once.
+     * Creates the fingerprints file on the virtual file system from a string.
      * @method
      * @param {string} data - fingerprints data in libotr format
      */
@@ -321,7 +321,7 @@
     };
 
     /**
-     * Creates the instags file on the virtual file system from a string. Can only be called once.
+     * Creates the instags file on the virtual file system from a string.
      * @method
      * @param {string} data - instags data in libotr format
      */
@@ -331,10 +331,10 @@
     };
 
     /**
-     * Returns and array of {@link module:otr.Account Account} elements, representing all the user accounts.
+     * Returns and array of {@link module:otr.Account Account} instances, representing all the user accounts.
      * If no accounts exist, the return value will be an empty array.
      * @method
-     * @returns {Array} Array of {@link module:otr.Account Account} elements.
+     * @returns {Array} Array of {@link module:otr.Account Account} instances.
      */
     User.prototype.accounts = function () {
         var user = this,
@@ -394,50 +394,112 @@
      */
     function Account(user, accountname, protocol) {
         var account = this;
+
+        /**
+         * Getter for the accountname of the account.
+         * @method
+         * @returns {string} The accountname.
+         */
         this.name = function () {
             return accountname;
         };
+
+        /**
+         * Getter for the protocol of the account.
+         * @method
+         * @returns {string} The protocol.
+         */
         this.protocol = function () {
             return protocol;
         };
+
+        /**
+         * Generates a new OTR key for the account. Will replace current key if it exists.
+         * @method
+         * @argument {module:otr.Account~generateKey_Callback} callback
+         */
         this.generateKey = function (callback) {
-            user.state.generateKey(user.keys, accountname, protocol, function () {
+            user.state.generateKey(user.keys, accountname, protocol, function (err, key) {
                 if (callback) {
-                    callback.apply(account, arguments);
+                    callback.apply(account, [err, key ? key.export() : undefined]);
                 }
             });
         };
+
+        /** Deletes OTR key of the account.
+         * @method
+         */
         this.deleteKey = function () {
             user.state.deleteKeyOnFile(user.keys, accountname, protocol);
         };
-        this.key = function () {
-            return user.state.findKey(accountname, protocol);
+
+        /** Returns the OTR key of the account.
+         * @method
+         * @returns {PrivKey} in base 16 (hexadecimal)
+         */
+        this.exportKey = function () {
+            var key = user.state.findKey(accountname, protocol);
+            if (key) return key.export();
+            return undefined;
         };
+
+        /* Returns the OTR key fingerprint in human readable format.
+         * @method
+         * @returns {string}
+         */
         this.fingerprint = function () {
             return user.state.fingerprint(accountname, protocol);
         };
+
+        /** Imports and replaces the OTR key of the account.
+         * @method
+         * @argument {PrivKey} key
+         * @argument {number} [base] - decimal representation of components of key. Default 16 (hexadecimal)
+         * @throws {Error} If key import fails.
+         */
         this.importKey = function (key, base) {
             user.state.importKey(accountname, protocol, key, base);
             user.state.writeKeysSync(user.keys);
         };
+
+        /** Generates a new instance tag for the account.
+         * @method
+         * @argument {module:otr.Account~generateInstag_Callback} callback
+         */
         this.generateInstag = function (callback) {
             try {
                 user.state.generateInstag(user.instags, accountname, protocol);
-                if (callback) {
-                    callback(null, user.state.findInstag(accountname, protocol));
+                if (typeof callback === 'function') {
+                    callback(undefined, user.state.findInstag(accountname, protocol));
                 }
             } catch (e) {
-                if (callback) {
-                    callback(e, null);
+                if (typeof callback === 'function') {
+                    callback(e, undefined);
                 }
             }
         };
+
+        /** Getter for instance tag of account.
+         * @method
+         * @returns {number} Instance tag
+         */
         this.instag = function () {
             return user.state.findInstag(accountname, protocol);
         };
-        this.contact = function (recipient) {
-            return new Contact(user, account, recipient);
+
+        /** Creates and instance of {@link module:otr.Contact Contact}.
+         * @method
+         * @argument {string} recipient - Name of recipient/contact
+         * @returns {Contact} instance of {@link module:otr.Contact Contact}
+         */
+        this.contact = function (name) {
+            return new Contact(user, account, name);
         };
+
+        /** Returns an array of Contact instances, representing all contacts
+         * @method
+         * @returns {array} of Contact instances
+         */
         this.contacts = function () {
             var contexts = user.state.masterContexts(),
                 contacts = [];
@@ -449,21 +511,73 @@
             });
             return contacts;
         };
+
+        /**
+         * @callback module:otr.Account~generateKey_Callback
+         * @param {Error} err - If there was an error generating the key
+         * @param {PrivKey} key - If key was successfully generated, undefined otherwise.
+         */
+
+        /**
+         * @callback module:otr.Account~generateInstag_Callback
+         * @param {Error} err - If there was an error generating the instance tag
+         * @param {number} instag - If instag was successfully generated, undefined otherwise.
+         */
+
+        /**
+         * An OTR key is a DSA key. This object stores the values of the components that make up the private and
+         * public key. It is provided as a means to easily export and import a key into an Account. It is returned
+         * in the callback supplied to generateKey method and  returned by the exportKey method of an Account instance.
+         * @typedef {Object} PrivKey
+         * @property {string} p - p
+         * @property {string} q - q
+         * @property {string} g - g
+         * @property {string} y - y
+         * @property {string} x - x
+         */
     }
 
-    function Contact(user, account, recipient) {
-        var context = new otr.ConnContext(user.state, account.name(), account.protocol(), recipient);
+    /** Contact
+     * @constructor
+     * @alias module:otr.Contact
+     * @argument {User} user - instance of {@link module:otr.User User}
+     * @argument {Account} account - instance of {@link module:otr.Account Account}
+     * @argument {string} name - name of the contact
+     */
+    function Contact(user, account, name) {
+        var context = new otr.ConnContext(user.state, account.name(), account.protocol(), name);
+
+        /** Getter for name of contact
+         * @method
+         * @returns {string} contact name
+         */
         this.name = function () {
-            return recipient;
+            return name;
         };
-        this.openSession = function (parameters) {
-            return new Session(user, account, this, parameters);
-        };
+
+        /** Returns an array of knwon Fingerprint instances for this contact.
+         * @method
+         * @returns {array} Array of Fingerprint instances.
+         */
         this.fingerprints = function () {
             return context.masterFingerprints();
         };
+
+        /** Setup an OTR session with the contact.
+         * @method
+         * @argument {Object} [parameters]
+         * @returns {Session}
+         */
+        this.openSession = function (parameters) {
+            return new Session(user, account, this, parameters);
+        };
+
     }
 
+    /** Session
+     * @constructor
+     * @alias module:otr.Session
+     */
     function Session(user, account, contact, parameters) {
         var session = this;
         if (events) {

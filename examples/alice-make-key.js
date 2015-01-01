@@ -20,7 +20,7 @@ account.generateKey(function (err, key) {
         user.saveKeysToFS('~/alice.keys');
 
         //export an individual key to a json file
-        fs.writeFileSync("./alice-xmpp-key.json", JSON.stringify(key.export()));
+        fs.writeFileSync("./alice-xmpp-key.json", JSON.stringify(key));
 
         print(user.keysToString());
         print("generated key fingerprint:", account.fingerprint());

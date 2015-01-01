@@ -91,5 +91,5 @@ otr-web: build/libotr4.js
 	cat lib/async.js lib/bigint.js build/libotr4.js src/bindings.js src/otr.js > build/otr-web.js	
 
 docs:
-	rm -fr docs/html
+	rm -fr doc/html/
 	jsdoc -d doc/html src/otr.js

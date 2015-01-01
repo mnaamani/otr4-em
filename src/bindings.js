@@ -154,7 +154,7 @@
             if (err) {
                 _free(buffer);
                 console.error("error exporting key:", gcry_.strerror(err));
-                throw (new GcryptError(err));
+                throw new GcryptError(err);
             } else {
                 dsakey[token] = Pointer_stringify(buffer);
             }
@@ -229,14 +229,12 @@
         if (typeof filename == 'string' && typeof accountname == 'string' && typeof protocol == 'string' &&
             typeof callback == 'function') {
             var err = otrl_.privkey_generate(this._pointer, filename, accountname, protocol);
-            try {
+            if (callback) {
                 callback.apply(self, [err ? new GcryptError(err) : null, err ? undefined : this.findKey(
                     accountname, protocol)]);
-            } catch (e) {
-                console.error("Fatal Exception -", e);
             }
         } else {
-            throw ("invalid arguments to generateKey()");
+            callback(new Error("invalid-arguments"));
         }
     };
     OtrlUserState.prototype.fingerprint = function (accountname, protocol) {
@@ -247,84 +245,75 @@
             _free(fp);
             return human;
         } else {
-            throw ("invalid arguments to fingerprint()");
+            throw new Error("invalid-arguments");
         }
     };
     OtrlUserState.prototype.readKeysSync = function (filename) {
         if (typeof filename == 'string') {
             var err = otrl_.privkey_read(this._pointer, filename);
-            if (err) throw (new GcryptError(err));
+            if (err) throw new GcryptError(err);
         } else {
-            throw ("invalid arguments to readKeysSync()");
+            throw new Error("invalid-arguments");
         }
     };
     OtrlUserState.prototype.writeKeysSync = function (filename) {
         if (typeof filename == 'string') {
             var err = jsapi_.userstate_write_to_file(this._pointer, filename);
-            if (err) throw (new GcryptError(err));
+            if (err) throw new GcryptError(err);
         } else {
-            throw ("invalid arguments to writeKeysSync()");
+            throw new Error("invalid-arguments");
         }
     };
     OtrlUserState.prototype.readFingerprintsSync = function (filename) {
         if (typeof filename == 'string') {
             var err = otrl_.privkey_read_fingerprints(this._pointer, filename, 0, 0);
-            if (err) throw (new GcryptError(err));
+            if (err) throw new GcryptError(err);
         } else {
-            throw ("invalid arguments to readFingerprintsSync()");
+            throw new Error("invalid-arguments");
         }
     };
     OtrlUserState.prototype.writeFingerprintsSync = function (filename) {
         if (typeof filename == 'string') {
             var err = otrl_.privkey_write_fingerprints(this._pointer, filename);
-            if (err) throw (new GcryptError(err));
+            if (err) throw new GcryptError(err);
         } else {
-            throw ("invalid arguments to writeFingerprintsSync()");
+            throw new Error("invalid-arguments");
         }
     };
     OtrlUserState.prototype.writeTrustedFingerprintsSync = function (filename) {
         if (typeof filename == 'string') {
             var err = jsapi_.privkey_write_trusted_fingerprints(this._pointer, filename);
-            if (err) throw (new GcryptError(err));
+            if (err) throw new GcryptError(err);
         } else {
-            throw ("invalid arguments to writeTrustedFingerprintsSync()");
+            throw new Error("invalid-arguments");
         }
     };
     OtrlUserState.prototype.readInstagsSync = function (filename) {
         if (typeof filename == 'string') {
             var err = otrl_.instag_read(this._pointer, filename);
-            if (err) throw (new GcryptError(err));
+            if (err) throw new GcryptError(err);
         } else {
-            throw ("invalid arguments to readInstagsSync()");
+            throw new Error("invalid-arguments");
         }
     };
     OtrlUserState.prototype.writeInstagsSync = function (filename) {
         if (typeof filename == 'string') {
             var err = otrl_.instag_write(this._pointer, filename);
-            if (err) throw (new GcryptError(err));
+            if (err) throw new GcryptError(err);
         } else {
-            throw ("invalid arguments to writeInstagsSync()");
+            throw new Error("invalid-arguments");
         }
     };
 
-    OtrlUserState.prototype.readKeys = function () {
-        throw ("use 'readKeysSync()' not 'readKeys()'");
-    };
-    OtrlUserState.prototype.readFingerprints = function () {
-        throw ("use 'readFingerprintsSync()' not 'readFingerprints()'");
-    };
-    OtrlUserState.prototype.writeFingerprints = function () {
-        throw ("use 'writeFingerprintsSync' not 'writeFingerprints()'");
-    };
     OtrlUserState.prototype.generateInstag = function (filename, accountname, protocol) {
         if (typeof filename == 'string' &&
             typeof accountname == 'string' &&
             typeof protocol == 'string'
         ) {
             var err = otrl_.instag_generate(this._pointer, filename, accountname, protocol);
-            if (err) throw (new GcryptError(err));
+            if (err) throw new GcryptError(err);
         } else {
-            throw ("invalid arguments to generateInstag()");
+            throw new Error("invalid-arguments");
         }
     };
     OtrlUserState.prototype.findInstag = function (accountname, protocol) {
@@ -335,7 +324,7 @@
             if (ptr) return (new OtrlInsTag(ptr)).instag();
             return undefined;
         } else {
-            throw ("invalid arguments to findInstag()");
+            throw new Error("invalid-arguments");
         }
     };
     OtrlUserState.prototype.findKey = function (accountname, protocol) {
@@ -379,7 +368,8 @@
         });
         if (doImport) {
             //console.log("importing mpi:",mpi);
-            err = jsapi_.userstate_import_privkey(this._pointer, accountname, protocol, mpi.p, mpi.q, mpi.g,
+            err = jsapi_.userstate_import_privkey(this._pointer, accountname, protocol, mpi.p, mpi.q,
+                mpi.g,
                 mpi.y, mpi.x);
             //console.log( "import result:", gcry_.strerror(err));
         }
@@ -406,7 +396,8 @@
 
             var addedp_addr = _malloc(4); //allocate(1, "i32", ALLOC_STACK);
             var instag = 0; //OTRL_INSTAG_MASTER
-            this._pointer = otrl_.context_find(userstate._pointer, recipient, accountname, protocol, instag, 1,
+            this._pointer = otrl_.context_find(userstate._pointer, recipient, accountname, protocol,
+                instag, 1,
                 addedp_addr, 0, 0);
             _free(addedp_addr);
         } else {
@@ -414,7 +405,7 @@
                 //assume arguments[0] == pointer to existing context;
                 this._pointer = arguments[0];
             } else {
-                throw ("invalid arguments to OtrlConnContext()");
+                throw new Error("invalid-arguments");
             }
         }
     }
@@ -539,12 +530,13 @@
         var ret_value;
 
         //handle ops synchronously
-        ['is_logged_in', 'policy', 'max_message_size', 'create_instag', 'create_privkey'].forEach(function (E) {
-            if (ev_name == E) {
-                event_handled = true;
-                ret_value = MAO[$index].instance._event_handler(ev_obj);
-            }
-        });
+        ['is_logged_in', 'policy', 'max_message_size', 'create_instag', 'create_privkey'].forEach(
+            function (E) {
+                if (ev_name == E) {
+                    event_handled = true;
+                    ret_value = MAO[$index].instance._event_handler(ev_obj);
+                }
+            });
 
         if (event_handled) {
             return ret_value;
@@ -555,7 +547,8 @@
         }
     }
 
-    OtrlMessageAppOps.prototype.messageSending = function (userstate, accountname, protocol, recipient, message,
+    OtrlMessageAppOps.prototype.messageSending = function (userstate, accountname, protocol, recipient,
+        message,
         to_instag, otrchannel) {
         if (!(
                 typeof userstate == 'object' &&
@@ -564,7 +557,7 @@
                 typeof recipient == 'string' &&
                 typeof message == 'string'
             )) {
-            throw ("invalid arguments to messageSending()");
+            throw new Error("invalid-arguments");
         }
         var messagep_ptr = _malloc(4); //char**
         setValue(messagep_ptr, 0, "i32");
@@ -573,7 +566,8 @@
         var contextp_ptr = _malloc(4); //pointer to context used to send to buddy
         var instag = to_instag || 1; //OTRL_INSTAG_BEST
 
-        var err = otrl_.message_sending(userstate._pointer, this._pointer, this._opsdata, accountname, protocol,
+        var err = otrl_.message_sending(userstate._pointer, this._pointer, this._opsdata, accountname,
+            protocol,
             recipient, instag,
             message, 0, messagep_ptr, frag_policy, contextp_ptr, 0, 0);
 
@@ -598,7 +592,8 @@
         return retvalue;
 
     };
-    OtrlMessageAppOps.prototype.messageReceiving = function (userstate, accountname, protocol, sender, message,
+    OtrlMessageAppOps.prototype.messageReceiving = function (userstate, accountname, protocol, sender,
+        message,
         otrchannel) {
         if (!(
                 typeof userstate == 'object' &&
@@ -607,7 +602,7 @@
                 typeof sender == 'string' &&
                 typeof message == 'string'
             )) {
-            throw ("invalid arguments to messageReceiving()");
+            throw new Error("invalid-arguments");
         }
         var contextp_ptr = _malloc(4); //pointer to context of buddy used to receive the message
         var newmessagep_ptr = _malloc(4); //char**
@@ -647,10 +642,11 @@
                 typeof protocol == 'string' &&
                 typeof recipient == 'string'
             )) {
-            throw ("invalid arguments to disconnect()");
+            throw new Error("invalid-arguments");
         }
 
-        otrl_.message_disconnect(userstate._pointer, this._pointer, this._opsdata, accountname, protocol,
+        otrl_.message_disconnect(userstate._pointer, this._pointer, this._opsdata, accountname,
+            protocol,
             recipient, instag);
     };
     OtrlMessageAppOps.prototype.initSMP = function (userstate, context, secret, question) {
@@ -659,7 +655,7 @@
                 typeof context == 'object' &&
                 typeof secret == 'string'
             )) {
-            throw ("invalid arguments to initSMP()");
+            throw new Error("invalid-arguments");
         }
 
         if (jsapi_.can_start_smp(context._pointer)) {
@@ -678,9 +674,10 @@
                 typeof context == 'object' &&
                 typeof secret == 'string'
             )) {
-            throw ("invalid arguments to respondSMP()");
+            throw new Error("invalid-arguments");
         }
-        otrl_.message_respond_smp(userstate._pointer, this._pointer, this._opsdata, context._pointer, secret,
+        otrl_.message_respond_smp(userstate._pointer, this._pointer, this._opsdata, context._pointer,
+            secret,
             secret.length);
     };
     OtrlMessageAppOps.prototype.abortSMP = function (userstate, context) {
@@ -688,7 +685,7 @@
                 typeof userstate == 'object' &&
                 typeof context == 'object'
             )) {
-            throw ("invalid arguments to abort_smp()");
+            throw new Error("invalid-arguments");
         }
         otrl_.message_abort_smp(userstate._pointer, this._pointer, this._opsdata, context._pointer);
     };
@@ -708,7 +705,8 @@
             setValue(usedata_ptr + i, usedata_view[i], "i8");
         }
 
-        var err = otrl_.message_symkey(userstate._pointer, this._pointer, this._opsdata, context._pointer, use,
+        var err = otrl_.message_symkey(userstate._pointer, this._pointer, this._opsdata, context._pointer,
+            use,
             usedata_ptr, usedata_view.length, symkey_ptr);
 
         if (!err) {
@@ -740,10 +738,21 @@
             });
         })();
 
+        //cp a file from real file system to virtual file system - full paths must be specified.
         this.importFile = function (source, destination, transform) {
-            //cp a file from real file system to virtual file system - full paths must be specified.
-            if (!fs) return;
-            destination = destination || source.substr(0);
+            if (!fs) {
+                throw new Error("node filesystem not available.");
+            }
+            if (typeof source !== 'string') {
+                throw new TypeError("first argument must be a string.");
+            }
+            if (typeof destination !== 'string') {
+                throw new TypeError("second argument must be a string.");
+            }
+            if (transform && typeof transform !== 'function') {
+                throw new TypeError("third argument must be a function.");
+            }
+
             destination = path_vfs(destination);
             source = path_real(source);
             var target_folder, data, virtual_file;
@@ -751,57 +760,94 @@
             if (filename) {
                 target_folder = Module.FS_findObject(path_vfs(path.dirname(destination)));
                 if (!target_folder) {
-                    target_folder = Module.FS_createPath("/", path_vfs(path.dirname(destination)), true,
+                    target_folder = Module.FS_createPath("/", path_vfs(path.dirname(destination)),
+                        true,
                         true);
                 }
                 if (target_folder) {
                     if (fs_existsSync(source)) {
                         data = fs.readFileSync(source);
                         data = transform ? transform(data) : data;
-                        virtual_file = Module.FS_createDataFile(target_folder, filename, data, true, true);
-                    } else console.error("importing to vfs, file not found.", source);
+                        virtual_file = Module.FS_findObject(path_vfs(destination));
+                        if (virtual_file) {
+                            //delete existing vfs file
+                            Module.FS_destroyNode(virtual_file);
+                        }
+                        virtual_file = Module.FS_createDataFile(target_folder, filename, data, true,
+                            true);
+                    } else throw new Error("No such file or directory '" + source + "'");
                 }
             }
         };
 
+        //cp a file from virtual file system to real file system
         this.exportFile = function (source, destination, transform) {
-            //cp a file from virtual file system to real file system
-            if (!fs) return;
+            if (!fs) {
+                throw new Error("node filesystem not available.");
+            }
+            if (typeof source !== 'string') {
+                throw new TypeError("first argument must be a string.");
+            }
+            if (typeof destination !== 'string') {
+                throw new TypeError("second argument must be a string.");
+            }
+            if (transform && typeof transform !== 'function') {
+                throw new TypeError("third argument must be a function.");
+            }
+
             var data, fd;
-            destination = destination || source.substr(0); //export to same path
             destination = path_real(destination);
             source = path_vfs(source);
             //TODO preserve same file permissions (mode) - make sure files only readable by user
             data = Module.FS_readDataFile(source);
             if (data) {
                 data = transform ? transform(data) : data;
-                if (!fs_existsSync(path_real(path.dirname(destination)))) fs.mkdirSync(path_real(path.dirname(
-                    destination)));
+                if (!fs_existsSync(path_real(path.dirname(destination)))) {
+                    fs.mkdirSync(path_real(path.dirname(destination)));
+                }
                 fd = fs.openSync(destination, "w");
                 fs.writeSync(fd, data, 0, data.length, 0);
                 fs.closeSync(fd);
-            } else console.error("virtual file not found", source);
+            } else throw new Error("virtual file not found '" + source + "'");
         };
 
         this.readFileData = function (source) {
+            if (typeof source !== "string") {
+                throw new TypeError("first argument must be a string.");
+            }
             source = path_vfs(source);
-            return Module.FS_readDataFile(source);
+            var virtual_file = Module.FS_findObject(path_vfs(source));
+            if (virtual_file) {
+                return Module.FS_readDataFile(source);
+            } else {
+                throw new Error("virtual file not found '" + source + "'");
+            }
         };
 
         this.makeFile = function (destination, data) {
-            //cp a file from real file system to virtual file system - full paths must be specified.
-            if (!fs) return;
+            if (typeof destination !== 'string') {
+                throw new TypeError('first argument must be a string.');
+            }
+            if (!(data instanceof Buffer)) {
+                throw new TypeError("second argument must be a Buffer.");
+            }
             destination = path_vfs(destination);
-            var target_folder;
+            var target_folder, virtual_file;
             var filename = destination.split('/').reverse()[0];
             if (filename) {
                 target_folder = Module.FS_findObject(path_vfs(path.dirname(destination)));
                 if (!target_folder) {
-                    target_folder = Module.FS_createPath("/", path_vfs(path.dirname(destination)), true,
+                    target_folder = Module.FS_createPath("/", path_vfs(path.dirname(destination)),
+                        true,
                         true);
                 }
 
                 if (target_folder && data) {
+                    virtual_file = Module.FS_findObject(path_vfs(destination));
+                    if (virtual_file) {
+                        //delete existing vfs file
+                        Module.FS_destroyNode(virtual_file);
+                    }
                     Module.FS_createDataFile(target_folder, filename, data, true, true);
                 }
             }

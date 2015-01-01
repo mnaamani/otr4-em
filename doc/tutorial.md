@@ -38,7 +38,6 @@ If you are creating a new set of account data you do not need to pass in any fil
 See the API documentation for additional methods for importing account data.
 
 It's important to note the following:
-* data can only be loaded *once* into the User object.
 * you must manually save the user data back to the file system. (see below)
 
 
