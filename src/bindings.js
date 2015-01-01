@@ -234,7 +234,7 @@
                     accountname, protocol)]);
             }
         } else {
-            callback(new Error("invalid-arguments"));
+            callback(new TypeError("invalid-arguments"));
         }
     };
     OtrlUserState.prototype.fingerprint = function (accountname, protocol) {
@@ -245,7 +245,7 @@
             _free(fp);
             return human;
         } else {
-            throw new Error("invalid-arguments");
+            throw new TypeError("invalid-arguments");
         }
     };
     OtrlUserState.prototype.readKeysSync = function (filename) {
@@ -253,7 +253,7 @@
             var err = otrl_.privkey_read(this._pointer, filename);
             if (err) throw new GcryptError(err);
         } else {
-            throw new Error("invalid-arguments");
+            throw new TypeError("invalid-arguments");
         }
     };
     OtrlUserState.prototype.writeKeysSync = function (filename) {
@@ -261,7 +261,7 @@
             var err = jsapi_.userstate_write_to_file(this._pointer, filename);
             if (err) throw new GcryptError(err);
         } else {
-            throw new Error("invalid-arguments");
+            throw new TypeError("invalid-arguments");
         }
     };
     OtrlUserState.prototype.readFingerprintsSync = function (filename) {
@@ -269,7 +269,7 @@
             var err = otrl_.privkey_read_fingerprints(this._pointer, filename, 0, 0);
             if (err) throw new GcryptError(err);
         } else {
-            throw new Error("invalid-arguments");
+            throw new TypeError("invalid-arguments");
         }
     };
     OtrlUserState.prototype.writeFingerprintsSync = function (filename) {
@@ -277,7 +277,7 @@
             var err = otrl_.privkey_write_fingerprints(this._pointer, filename);
             if (err) throw new GcryptError(err);
         } else {
-            throw new Error("invalid-arguments");
+            throw new TypeError("invalid-arguments");
         }
     };
     OtrlUserState.prototype.writeTrustedFingerprintsSync = function (filename) {
@@ -285,7 +285,7 @@
             var err = jsapi_.privkey_write_trusted_fingerprints(this._pointer, filename);
             if (err) throw new GcryptError(err);
         } else {
-            throw new Error("invalid-arguments");
+            throw new TypeError("invalid-arguments");
         }
     };
     OtrlUserState.prototype.readInstagsSync = function (filename) {
@@ -293,7 +293,7 @@
             var err = otrl_.instag_read(this._pointer, filename);
             if (err) throw new GcryptError(err);
         } else {
-            throw new Error("invalid-arguments");
+            throw new TypeError("invalid-arguments");
         }
     };
     OtrlUserState.prototype.writeInstagsSync = function (filename) {
@@ -301,7 +301,7 @@
             var err = otrl_.instag_write(this._pointer, filename);
             if (err) throw new GcryptError(err);
         } else {
-            throw new Error("invalid-arguments");
+            throw new TypeError("invalid-arguments");
         }
     };
 
@@ -313,7 +313,7 @@
             var err = otrl_.instag_generate(this._pointer, filename, accountname, protocol);
             if (err) throw new GcryptError(err);
         } else {
-            throw new Error("invalid-arguments");
+            throw new TypeError("invalid-arguments");
         }
     };
     OtrlUserState.prototype.findInstag = function (accountname, protocol) {
@@ -324,7 +324,7 @@
             if (ptr) return (new OtrlInsTag(ptr)).instag();
             return undefined;
         } else {
-            throw new Error("invalid-arguments");
+            throw new TypeError("invalid-arguments");
         }
     };
     OtrlUserState.prototype.findKey = function (accountname, protocol) {
@@ -405,7 +405,7 @@
                 //assume arguments[0] == pointer to existing context;
                 this._pointer = arguments[0];
             } else {
-                throw new Error("invalid-arguments");
+                throw new TypeError("invalid-arguments");
             }
         }
     }
@@ -557,7 +557,7 @@
                 typeof recipient == 'string' &&
                 typeof message == 'string'
             )) {
-            throw new Error("invalid-arguments");
+            throw new TypeError("invalid-arguments");
         }
         var messagep_ptr = _malloc(4); //char**
         setValue(messagep_ptr, 0, "i32");
@@ -602,7 +602,7 @@
                 typeof sender == 'string' &&
                 typeof message == 'string'
             )) {
-            throw new Error("invalid-arguments");
+            throw new TypeError("invalid-arguments");
         }
         var contextp_ptr = _malloc(4); //pointer to context of buddy used to receive the message
         var newmessagep_ptr = _malloc(4); //char**
@@ -642,7 +642,7 @@
                 typeof protocol == 'string' &&
                 typeof recipient == 'string'
             )) {
-            throw new Error("invalid-arguments");
+            throw new TypeError("invalid-arguments");
         }
 
         otrl_.message_disconnect(userstate._pointer, this._pointer, this._opsdata, accountname,
@@ -655,7 +655,7 @@
                 typeof context == 'object' &&
                 typeof secret == 'string'
             )) {
-            throw new Error("invalid-arguments");
+            throw new TypeError("invalid-arguments");
         }
 
         if (jsapi_.can_start_smp(context._pointer)) {
@@ -674,7 +674,7 @@
                 typeof context == 'object' &&
                 typeof secret == 'string'
             )) {
-            throw new Error("invalid-arguments");
+            throw new TypeError("invalid-arguments");
         }
         otrl_.message_respond_smp(userstate._pointer, this._pointer, this._opsdata, context._pointer,
             secret,
@@ -685,7 +685,7 @@
                 typeof userstate == 'object' &&
                 typeof context == 'object'
             )) {
-            throw new Error("invalid-arguments");
+            throw new TypeError("invalid-arguments");
         }
         otrl_.message_abort_smp(userstate._pointer, this._pointer, this._opsdata, context._pointer);
     };
