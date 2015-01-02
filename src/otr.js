@@ -602,9 +602,15 @@
 
     }
 
-    /** Session
+    /** Session class is an EventEmitter, that handles the OTR protocol.
+     * You can optionally add an isOnline() method which should return true if contact is online.
+     * This determines wether to send hearbeats or not. If method is not added contact is assumed to be online.
      * @constructor
      * @alias module:otr.Session
+     * @param {User} user -
+     * @param {Account} account -
+     * @param {Contact} contact -
+     * @param {OTRParams} [parameters] -
      */
     function Session(user, account, contact, parameters) {
         var session = this;
@@ -622,10 +628,18 @@
         }, user.getMessagePollDefaultInterval() * 1000 || 70 * 1000);
     }
 
+    /** Sends the OTR query message to start the OTR protocol.
+     * @method
+     */
     Session.prototype.start = function () {
         return this.send("?OTR?");
     };
 
+    /** Send a message to contact
+     * @method
+     * @param {string} message - a string or object with a toString() method
+     * @param {number} instag - instance tag of contact if known.
+     */
     Session.prototype.send = function (message, instag) {
         var session = this;
         nextTick(function () {
@@ -642,6 +656,10 @@
         });
     };
 
+    /** Pass incoming data/messages from contact to this method to be handled by OTR
+     * @method
+     * @param {string} message - a string or object with a toString() method
+     */
     Session.prototype.recv = function (message) {
         var session = this;
         nextTick(function () {
@@ -656,6 +674,9 @@
         });
     };
 
+    /** Ends an OTR conversation and returns to plain text.
+     * @method
+     */
     Session.prototype.end = function () {
         var session = this;
         nextTick(function () {
@@ -671,6 +692,11 @@
         });
     };
 
+    /** Starts SMP authentication
+     * @method
+     * @param {string} [secret] - secret to use for authentication. If not provided it will be taken from session parameters.
+     * @throws {Error}
+     */
     Session.prototype.smpStart = function (secret) {
         var session = this;
         var sec = secret;
@@ -684,6 +710,12 @@
         }
     };
 
+    /** Starts SMP authentication with a question.
+     * @method
+     * @param {string} question - question to display to contact when they receive the SMP authentication request.
+     * @param {string} secret - secret to use for authentication.
+     * @throws {Error}
+     */
     Session.prototype.smpStartQuestion = function (question, secret) {
         var session = this;
         if (!question) {
@@ -705,6 +737,11 @@
         });
     };
 
+    /** Respond to an SMP authentication request.
+     * @method
+     * @param {string} [secret] - secret to use for authentication. If not provided it will be taken from session parameters.
+     * @throws {Error}
+     */
     Session.prototype.smpRespond = function (secret) {
         var session = this;
         var sec = secret || undefined;
@@ -719,6 +756,9 @@
         });
     };
 
+    /** Abort active SMP authentication
+     * @method
+     */
     Session.prototype.smpAbort = function () {
         var session = this;
         nextTick(function () {
@@ -726,50 +766,102 @@
         });
     };
 
+    /** Return true if session is encrypted (private)
+     * @method
+     * @returns {boolean}
+     */
     Session.prototype.isEncrypted = function () {
         return (this.context.msgstate() === 1);
     };
 
+    /** Return true if session is in Plaintext mode (not private)
+     * @method
+     * @returns {boolean}
+     */
     Session.prototype.isPlaintext = function () {
         return (this.context.msgstate() === 0);
     };
 
+    /** Return true if remote contact has disconnected
+     * @method
+     * @returns {boolean}
+     */
     Session.prototype.isFinished = function () {
         return (this.context.msgstate() === 2);
     };
 
+    /** Return true if contact's public key fingerpint is trusted. (authenticated with SMP)
+     * @method
+     * @returns {boolean}
+     */
     Session.prototype.isAuthenticated = function () {
         return (this.context.trust() === "smp");
     };
 
+    /** Returns the extra symmetric key and informs contact that we want to use it.
+     * @method
+     * @param {number} use
+     * @param {ArrayBuffer} usedata
+     * @returns {ArrayBuffer}
+     */
     Session.prototype.extraSymKey = function (use, usedata) {
         return this.ops.extraSymKey(this.user.state, this.context, use, usedata);
     };
 
+    /** Returns contact's instance tag
+     * @method
+     * @return {number}
+     */
     Session.prototype.theirInstance = function () {
         return this.context.their_instance();
     };
 
+    /** Returns our instance tag
+     * @method
+     * @return {number}
+     */
     Session.prototype.ourInstance = function () {
         return this.context.our_instance();
     };
 
+    /** Returns the active OTR protocol version
+     * @method
+     * @return {number}
+     */
     Session.prototype.protocolVersion = function () {
         return this.context.protocol_version();
     };
 
+    /** Returns the contact's human readable public key fingerprint
+     * @method
+     * @return {string}
+     */
     Session.prototype.theirFingerprint = function () {
         return this.context.fingerprint();
     };
 
+    /** Call the destroy method to remove all event listeners and release resources used by the session.
+     * @method
+     */
     Session.prototype.destroy = function () {
         var session = this;
         if (session.message_poll_interval) {
             clearInterval(session.message_poll_interval);
         }
         session.removeAllListeners();
-        session.end();
+        this.user = undefined;
+        this.context = undefined;
+        this.parameters = undefined;
+        this.ops = undefined; //todo - free allocated memory for OtrlMessageAppOps structure.
     };
+
+    /**
+     * Optional OTR Session parameters.
+     * @typedef {Object} OTRParams
+     * @property {number} policy - {@link module:otr.POLICY POLICY} default is otr.POLICY.DEFAULT
+     * @property {string} secret - shared secret to use during SMP authentication if not specified as argument in smp methods.
+     * @property {number} MTU - max message fragment size in bytes, default is 0 which means no fragmentation.
+     */
 
     //add a simple events API for use in the browser
     if (!Session.prototype.on) {
