@@ -40,15 +40,15 @@
         'WHITESPACE_START_AKE': 0x20,
         'ERROR_START_AKE': 0x40,
         /** ALLOW_V1 | ALLOW_V2 | ALLOW_V3 */
-        'VERSION_MASK': 0x01 | 0x02 | 0x03,
+        'VERSION_MASK': 0x01 | 0x02 | 0x04,
         /** VERSION_MASK | SEND_WHITESPACE_TAG | WHITESPACE_START_AKE | ERROR_START_AKE */
-        'OPPORTUNISTIC': 0x01 | 0x02 | 0x03 | 0x10 | 0x20 | 0x40,
+        'OPPORTUNISTIC': 0x01 | 0x02 | 0x04 | 0x10 | 0x20 | 0x40,
         /** VERSION_MASK */
-        'MANUAL': 0x01 | 0x02 | 0x03,
+        'MANUAL': 0x01 | 0x02 | 0x04,
         /** VERSION_MASK | REQUIRE_ENCRYPTION | WHITESPACE_START_AKE | ERROR_START_AKE */
-        'ALWAYS': 0x01 | 0x02 | 0x03 | 0x08 | 0x20 | 0x40,
+        'ALWAYS': 0x01 | 0x02 | 0x04 | 0x08 | 0x20 | 0x40,
         /** OPPORTUNISTIC */
-        'DEFAULT': 0x01 | 0x02 | 0x03 | 0x10 | 0x20 | 0x40
+        'DEFAULT': 0x01 | 0x02 | 0x04 | 0x10 | 0x20 | 0x40
     };
 
     var MSGEVENT_ARRAY = ["NONE", "ENCRYPTION_REQUIRED", "ENCRYPTION_ERROR", "CONNECTION_ENDED", "SETUP_ERROR",
