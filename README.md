@@ -8,7 +8,9 @@ You can install the module directly from npm registry:
 
 A short [tutorial](https://github.com/mnaamani/otr4-em/blob/master/doc/tutorial.md) is available.
 
-API documentation can be found [here](http://www.mokhtar.net/projects/otr4-em/docs/)
+Latest API documentation can be found [here](http://www.mokhtar.net/projects/otr4-em/docs/)
+
+For version's older than v0.1.0 see documentation [here](https://github.com/mnaamani/otr4-em/blob/master/doc/api_old.md)
 
 Example Use:
 - [node](https://github.com/mnaamani/otr4-em/blob/master/examples/index.js)
