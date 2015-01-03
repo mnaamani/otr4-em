@@ -1,14 +1,23 @@
 var net = require("net");
 var otr = require("../src/otr.js");
 
-var user = new otr.User(),
-    account = user.account("net_alice", "tcp"),
+var user = new otr.User({
+        keys: "./alice.keys"
+    }),
+    account = user.account("alice@telechat.org", "telechat"),
     contact = account.contact("bob");
+if (!account.fingerprint()) {
+    console.log("no key found");
+    process.exit();
+}
+account.generateInstag();
 
 var server = net.createServer(function (conn) {
     conn.pause(); //allow time to setup all event handlers
 
-    var session = contact.openSession();
+    var session = contact.openSession({
+        debug: false
+    });
 
     session.online = function () {
         console.log("checking if contact is online..");
@@ -31,6 +40,7 @@ var server = net.createServer(function (conn) {
     session.on("write_fingerprints", function () {
         console.log("got write_fingerprints event");
     });
+
     session.on("gone_secure", function () {
         console.log("got gone_secure event");
     });
@@ -47,9 +57,13 @@ var server = net.createServer(function (conn) {
         } catch (e) {}
     });
 
+    session.on("plaintext", function () {
+        session.destroy();
+    });
+
     conn.on("end", function () {
         console.log("closing connection");
-        session.destroy();
+        session.end();
     });
 
     conn.on("data", function (data) {
@@ -59,14 +73,9 @@ var server = net.createServer(function (conn) {
     conn.resume(); //start emitting data events
 });
 
-
-console.log("Generating a Key...");
-account.generateInstag();
-account.generateKey(function () {
-    server.listen(
-        8123,
-        function () {
-            console.log("listening on port:", server.address().port);
-        }
-    );
-});
+server.listen(
+    8123,
+    function () {
+        console.log("listening on port:", server.address().port);
+    }
+);

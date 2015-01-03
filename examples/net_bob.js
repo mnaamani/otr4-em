@@ -1,14 +1,17 @@
 var net = require("net");
 var otr = require("../src/otr.js");
 
-var user = new otr.User(),
-    account = user.account("net_bob", "tcp"),
+var user = new otr.User({
+        keys: "./bob.keys"
+    }),
+    account = user.account("bob@telechat.org", "telechat"),
     contact = account.contact("alice");
 
-console.log("Generating a Key...");
-account.generateKey();
+if (!account.fingerprint()) {
+    console.log("no key found");
+    process.exit();
+}
 account.generateInstag();
-
 console.log("connecting...");
 
 var conn = new net.Socket();
@@ -46,6 +49,14 @@ session.on("message", function (message, private) {
 
 conn.on("data", function (data) {
     session.recv(data);
+});
+
+conn.on("end", function () {
+    process.exit();
+});
+
+conn.on("error", function () {
+    process.exit();
 });
 
 conn.connect(8123, function () {

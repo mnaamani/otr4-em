@@ -28,7 +28,7 @@ if (typeof process !== "undefined") {
 
 var debug = debug || function debug() {
     console.log([].join.call(arguments, " "));
-}
+};
 
 debug("== loaded libotr version:", otr.version());
 
@@ -264,7 +264,7 @@ var loop = setInterval(function () {
     if (session_a.isEncrypted() && SYMKEY_TEST_DONE && SMP_TEST_DONE) {
         debug("sending message");
         session_a.send("test encrypted message");
-        session_b.recv("this is an unencrypted message, during a secure session!"); //should raise a msg_event UNENCRYPTED
+        session_a.recv("this is an unencrypted message, during a secure session!"); //should raise a msg_event UNENCRYPTED
         return;
     }
 
