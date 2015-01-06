@@ -207,7 +207,7 @@ mergeInto(LibraryManager.library, {
         Module["ops_event"](opdata, (new Module["ConnContext"](context))["obj"](),"smp_failed");
   },
     
-  do_smp_aborted: function($opdata,$context){
+  do_smp_aborted: function(opdata,context){
         Module["ops_event"](opdata, (new Module["ConnContext"](context))["obj"](),"smp_aborted");
   },
     
