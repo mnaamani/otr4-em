@@ -21,7 +21,8 @@ Related projects:
 - [otr talk](https://github.com/mnaamani/node-otr-talk) p2p chat (command line chat app)
 
 ### License
-GPLv2
+The module is dual licensed: GPLv2 and LGPL
+You may choose the license that is more suitable for your application.
 
 ### built on
 - [crypto-emscipten](https://github.com/mnaamani/crypto-emscripten/) libgcrypt/libotr builder.
