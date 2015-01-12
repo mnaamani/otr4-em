@@ -1,6 +1,6 @@
 /** @module otr */
 (function () {
-    "user strict";
+    "use strict";
     /*
      *  Off-the-Record Messaging bindings for node/javascript
      *  Copyright (C) 2012  Mokhtar Naamani,

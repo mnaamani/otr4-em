@@ -1,5 +1,5 @@
 (function () {
-	"user strict";
+	"use strict";
 
 	/*
 	 *  Off-the-Record Messaging bindings for node/javascript
