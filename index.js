@@ -1,1 +1,1 @@
-module.exports = require("./src/otr.js");
+module.exports = require("./lib/otr.js");

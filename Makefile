@@ -80,16 +80,16 @@ OPTIMISATION= -O2 --closure 1 --llvm-opts 1 -s LINKABLE=1 $(EXPORTED_FUNCS) -s A
 libotr4.js: src/*.js lib/*.js
 	mkdir -p build/
 	$(EMCC) src/jsapi.c -I$(CRYPTO_BUILD)/include -lotr -L$(CRYPTO_BUILD)/lib \
-        -o build/_libotr4.js \
-        --pre-js src/otr_pre.js \
-        -s TOTAL_MEMORY=1048576  -s TOTAL_STACK=409600 \
-        $(OPTIMISATION) --js-library src/library_gcrypt.js --js-library src/library_otr.js
+		-o build/_libotr4.js \
+		--pre-js src/otr_pre.js \
+		-s TOTAL_MEMORY=1048576  -s TOTAL_STACK=409600 \
+		$(OPTIMISATION) --js-library src/library_gcrypt.js --js-library src/library_otr.js
 	cat src/header.js build/_libotr4.js src/footer.js > build/libotr4.js
 	rm build/_libotr4.js
 
 otr-web: build/libotr4.js
-	cat lib/async.js lib/bigint.js build/libotr4.js src/bindings.js src/otr.js > build/otr-web.js	
+	browserify --im lib/otr.js -s OTR | sed -e "s/var process = module.exports = {};/var process=module.exports={};process.platform='browser';process.stdout={write:function(x){console.log(x)}};process.stderr={write:function(x){console.error(x)}};process.exit=noop;/" > build/otr-web.js
 
 docs:
 	rm -fr doc/html/
-	jsdoc -d doc/html src/otr.js
+	jsdoc -d doc/html lib/otr.js
