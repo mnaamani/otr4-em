@@ -25,6 +25,7 @@ EXPORTED_FUNCS= -s EXPORTED_FUNCTIONS="[ \
   '_otrl_privkey_hash_to_human', \
   '_otrl_context_find',\
   '_otrl_context_forget',\
+  '_otrl_context_forget_fingerprint', \
   '_otrl_message_sending',\
   '_otrl_message_free',\
   '_otrl_message_fragment_and_send', \
