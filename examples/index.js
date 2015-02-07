@@ -138,7 +138,7 @@ session_b.on("create_instag", function (a, p) {
 session_a.on("gone_secure", function () {
 	debug("[Alice] Encrypted Connection Established - Gone Secure.");
 });
-session_a.on("gone_secure", function () {
+session_b.on("gone_secure", function () {
 	debug("[Bob] Encrypted Connection Established - Gone Secure.");
 });
 
@@ -313,12 +313,12 @@ function exit_test(msg, TEST_PASSED) {
 }
 
 function dumpConnContext(session, msg) {
-	debug(msg, "\n", JSON.stringify(session.context.fields()));
+	debug(msg, "\n", session.context);
 }
 
 function dumpFingerprints(fingerprints) {
 	fingerprints.forEach(function (fp) {
-		debug(fp.fingerprint(), fp.trust());
+		debug(fp, fp.trust());
 	});
 }
 
