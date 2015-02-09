@@ -1,6 +1,7 @@
-if (typeof exports !== 'undefined') {
-	var async = require("../lib/async");
-	var OTR = require("../index.js");
+var OTR;
+
+if (typeof OTR === 'undefined') {
+	OTR = require("../index.js");
 }
 
 var otr = OTR;
@@ -78,28 +79,14 @@ var session_b = ALICE.openSession({
 dumpConnContext(session_a, "Alice's ConnContext:");
 dumpConnContext(session_b, "Bob's ConnContext:");
 
-var NET_QUEUE_A = async.queue(handle_messages, 1);
-var NET_QUEUE_B = async.queue(handle_messages, 1);
-
-function handle_messages(O, callback) {
-	O.session.recv(O.msg);
-	callback();
-}
-
 //simulate a network connection between two parties
 session_a.on("inject_message", function (msg) {
 	debug("ALICE:", msg);
-	NET_QUEUE_A.push({
-		session: session_b,
-		msg: msg
-	});
+	session_b.recv(msg);
 });
 session_b.on("inject_message", function (msg) {
 	debug("BOB:", msg);
-	NET_QUEUE_B.push({
-		session: session_a,
-		msg: msg
-	});
+	session_a.recv(msg);
 });
 
 session_a.on("create_privkey", function (a, p) {
@@ -242,7 +229,7 @@ var loop = setInterval(function () {
 	debug("_");
 
 	//wait for secure session to be established
-	if (!session_a.isEncrypted() && !session_b.isEncrypted()) return;
+	if (!session_a.isEncrypted() || !session_b.isEncrypted()) return;
 
 	//dont do anything if tests are in progress
 	if (SMP_TEST_IN_PROGRESS || SYMKEY_TEST_IN_PROGRESS) {
