@@ -37,3 +37,4 @@ exports.Session = require("./lib/Session.js").Session;
 exports.Contact = require("./lib/Contact.js").Contact;
 exports.POLICY = require("./lib/POLICY.js");
 exports.MSGEVENT = require("./lib/MSGEVENT.js");
+exports.Buffer = require("buffer").Buffer;
