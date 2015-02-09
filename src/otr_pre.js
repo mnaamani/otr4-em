@@ -35,6 +35,7 @@ this["Module"] = Module = {
     Module["libotrl"]["context_find"]=cwrap('otrl_context_find','number',['number','string','string','string','number','number','number','number','number']);
     Module["libotrl"]["context_forget"]=cwrap('otrl_context_forget','number',['number']);
     Module["libotrl"]["context_forget_fingerprint"]=cwrap('otrl_context_forget_fingerprint','',['number']);
+    Module["libotrl"]["context_set_trust"]=cwrap('otrl_context_set_trust','',['number','string']);
     Module["libotrl"]["message_sending"]=cwrap('otrl_message_sending','number',['number','number','number','string','string','string',
                                                                                                     'number','string','number','number','number','number','number','number']);
     Module["libotrl"]["message_free"]=cwrap('otrl_message_free','',['number']);
