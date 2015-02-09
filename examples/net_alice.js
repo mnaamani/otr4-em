@@ -30,7 +30,6 @@ var server = net.createServer(function (conn) {
 	session.on("disconnect", function () {
 		console.log("remote side ended secure session.");
 		session.end(); //return to plain text
-		//conn.end();
 	});
 
 	session.on("new_fingerprint", function (fingerprint) {
@@ -58,12 +57,12 @@ var server = net.createServer(function (conn) {
 	});
 
 	session.on("plaintext", function () {
-		session.destroy();
+		conn.end();
 	});
 
 	conn.on("end", function () {
 		console.log("closing connection");
-		session.end();
+		session.destroy();
 	});
 
 	conn.on("data", function (data) {
