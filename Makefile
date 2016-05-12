@@ -82,7 +82,7 @@ OPTIMISATION= -O2 --closure 1 --llvm-opts 1 -s LINKABLE=1 $(EXPORTED_FUNCS) -s A
 
 libotr4.js: src/*.js lib/*.js
 	mkdir -p build/
-	$(EMCC) src/jsapi.c -I$(CRYPTO_BUILD)/include -lotr -L$(CRYPTO_BUILD)/lib \
+	$(EMCC) src/jsapi.c -I$(CRYPTO_BUILD)/include -lotr -lgcrypt -lgpg-error -L$(CRYPTO_BUILD)/lib \
 		-o build/_libotr4.js \
 		--pre-js src/otr_pre.js \
 		-s TOTAL_MEMORY=1048576  -s TOTAL_STACK=409600 \

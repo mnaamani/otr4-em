@@ -21,8 +21,8 @@
 
 var libotr = require("./lib/bindings");
 
-if (libotr.version() !== "4.1.0-emscripten") {
-	console.error("Error. excpecting libotr4.1.0-emscripten! exiting..");
+if (libotr.version() !== "4.1.1-emscripten") {
+	console.error("Error. excpecting libotr4.1.1-emscripten! exiting..");
 	throw ("Invalid libotr version returned");
 }
 
